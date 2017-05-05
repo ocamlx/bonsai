@@ -57,20 +57,22 @@ union v3
 
 };
 
+
+// Note: OpenGL matrices have x first
 union v4
 {
-  struct { float w, x, y, z; };
+  struct { float x, y, z, w; };
   struct { float r, g, b, a; };
 
   struct {
-    float Ignored0_;
     v2 xy;
+    float Ignored0_;
     float Ignored01_;
   };
 
   struct {
-    float Ignored02_;
     v3 xyz;
+    float Ignored02_;
   };
 
   float E[4];
@@ -78,15 +80,15 @@ union v4
 
   v4()
   {
-    *this = v4(1,0,0,0);
+    *this = v4(0,0,0,1);
   }
 
   v4(v3 v, float w)
   {
-    this->w = w;
     this->x = v.x;
     this->y = v.y;
     this->z = v.z;
+    this->w = w;
   }
 
   v4(float w, v3 v)
@@ -94,7 +96,7 @@ union v4
     *this = v4(v, w);
   }
 
-  v4(float w, float x, float y, float z)
+  v4( float x, float y, float z, float w)
   {
     this->x = x;
     this->y = y;
@@ -111,7 +113,7 @@ union v4
 
 };
 
-v4 V4(float w, float x, float y, float z)
+v4 V4(float x, float y, float z, float w)
 {
   v4 Result;
 
@@ -197,16 +199,12 @@ operator*(m4 A, m4 B)
 
   m4 Result = {};
 
+  Result[0][0] = A[0][0]*B[0][0] + A[0][1]*B[1][0] + A[0][2]*B[2][0] + A[0][3]*B[3][0];
+  Result[0][1] = A[0][0]*B[0][1] + A[0][1]*B[1][1] + A[0][2]*B[2][1] + A[0][3]*B[3][1];
+  Result[0][2] = A[0][0]*B[0][2] + A[0][1]*B[1][2] + A[0][2]*B[2][2] + A[0][3]*B[3][2];
+  Result[0][3] = A[0][0]*B[0][3] + A[0][1]*B[1][3] + A[0][2]*B[2][3] + A[0][3]*B[3][3];
 
-  // OpenGL matrices 
-  Result[0].w = A[0][0]*B[0][0] + A[0][1]*B[1][0] + A[0][2]*B[2][0] + A[0][3]*B[3][0];
-  Result[1].w = A[0][0]*B[0][1] + A[0][1]*B[1][1] + A[0][2]*B[2][1] + A[0][3]*B[3][1];
-  Result[2].w = A[0][0]*B[0][2] + A[0][1]*B[1][2] + A[0][2]*B[2][2] + A[0][3]*B[3][2];
-  Result[3].w = A[0][0]*B[0][3] + A[0][1]*B[1][3] + A[0][2]*B[2][3] + A[0][3]*B[3][3];
-
-
-  GlmResult = GLM4(MA * MB);
-  return Result;
+  return GlmResult;
 }
 
 Quaternion
@@ -993,7 +991,7 @@ operator-(canonical_position P1, canonical_position P2)
 inline Quaternion
 Conjugate( Quaternion q )
 {
-  Quaternion Result(q.w, -q.x, -q.y, -q.z);
+  Quaternion Result(-q.x, -q.y, -q.z, q.w);
   return Result;
 }
 
