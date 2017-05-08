@@ -186,15 +186,15 @@ operator*(m4 A, m4 B)
   m4 GlmResult = GLM4(MA * MB);
 
 
-  v4 A0 = A[0];
-  v4 A1 = A[1];
-  v4 A2 = A[2];
-  v4 A3 = A[3];
+  /* v4 A0 = A[0]; */
+  /* v4 A1 = A[1]; */
+  /* v4 A2 = A[2]; */
+  /* v4 A3 = A[3]; */
 
-  v4 B0 = B[0];
-  v4 B1 = B[1];
-  v4 B2 = B[2];
-  v4 B3 = B[3];
+  /* v4 B0 = B[0]; */
+  /* v4 B1 = B[1]; */
+  /* v4 B2 = B[2]; */
+  /* v4 B3 = B[3]; */
 
 
   m4 Result = {};
@@ -697,6 +697,28 @@ v2 operator+=(v2 P1, v2 P2)
 
   Result.x = P1.x + P2.x;
   Result.y = P1.y + P2.y;
+
+  return Result;
+}
+
+v2
+operator*(v2 P1, r32 F)
+{
+  v2 Result;
+
+  Result.x = P1.x * F;
+  Result.y = P1.y * F;
+
+  return Result;
+}
+
+v2
+operator-(v2 P1, v2 P2)
+{
+  v2 Result;
+
+  Result.x = P1.x - P2.x;
+  Result.y = P1.y - P2.y;
 
   return Result;
 }
