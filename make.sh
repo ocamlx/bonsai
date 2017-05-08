@@ -1,6 +1,6 @@
 #! /bin/bash
 
-if [ $WIN32 -eq 1 ]; then
+if [ "$WIN32" == "1" ]; then
 
   echo " -- Building Win32"
 
@@ -16,9 +16,9 @@ else # Unix
   BINARY="bin/Bonsai"
 
   cd build
-  make "$@" 2>&1 && cp ./bin/Game.so ./bin/GameLoadable.so
+  make "$@" 2>&1 && mv ../bin/libGame.so ../bin/libGameLoadable.so
 
-  [ $? -eq 0 ] && ./$BINARY > /dev/tty
+  [ $? -eq 0 ] && ../$BINARY > /dev/tty
 
 fi
 
