@@ -28,6 +28,7 @@ struct work_queue_entry
 {
   void (*Callback)(void*);
   void *Input;
+  game_state *GameState;
 };
 
 struct thread
