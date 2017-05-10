@@ -532,6 +532,43 @@ V3(voxel_position wp)
   return Result;
 }
 
+inline v3
+V3(int x, int y, int z)
+{
+  v3 Result = {};
+
+  Result.x = (float)x;
+  Result.y = (float)y;
+  Result.z = (float)z;
+
+  return Result;
+}
+
+inline v3
+V3(float x, float y, float z)
+{
+  v3 Result = {};
+
+  Result.x = x;
+  Result.y = y;
+  Result.z = z;
+
+  return Result;
+}
+
+inline v3
+operator+(v3 A, v3 B)
+{
+  v3 Result;
+
+  Result.x = A.x + B.x;
+  Result.y = A.y + B.y;
+  Result.z = A.z + B.z;
+
+  return Result;
+}
+
+
 struct line
 {
   v3 MinP;
@@ -568,7 +605,25 @@ struct aabb
     MinCorner = V3(Min);
     MaxCorner = V3(Max);
   }
+
+  aabb()
+  {
+    MinCorner = V3(0,0,0);
+    MaxCorner = V3(0,0,0);
+  }
+
 };
+
+inline aabb
+operator+(aabb AABB, v3 V)
+{
+  aabb Result;
+
+  Result.MinCorner = AABB.MinCorner + V;
+  Result.MaxCorner = AABB.MaxCorner + V;
+
+  return Result;
+}
 
 inline m4
 Translate( v3 v )
@@ -578,30 +633,6 @@ Translate( v3 v )
   Result.E[1] = v4(0,1,0,v.y);
   Result.E[2] = v4(0,0,1,v.z);
   Result.E[3] = v4(0,0,0,1);
-
-  return Result;
-}
-
-inline v3
-V3(int x, int y, int z)
-{
-  v3 Result = {};
-
-  Result.x = (float)x;
-  Result.y = (float)y;
-  Result.z = (float)z;
-
-  return Result;
-}
-
-inline v3
-V3(float x, float y, float z)
-{
-  v3 Result = {};
-
-  Result.x = x;
-  Result.y = y;
-  Result.z = z;
 
   return Result;
 }
@@ -834,18 +865,6 @@ operator+=(voxel_position& A, voxel_position B)
   A.z += B.z;
 
   return(A);
-}
-
-inline v3
-operator+(v3 A, v3 B)
-{
-  v3 Result;
-
-  Result.x = A.x + B.x;
-  Result.y = A.y + B.y;
-  Result.z = A.z + B.z;
-
-  return Result;
 }
 
 inline v3&
