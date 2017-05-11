@@ -3,11 +3,12 @@
 if [ "$WIN32" == "1" ]; then
 
   echo " -- Building Win32"
+  rm bin/Debug/*.pdb
 
   BINARY="bin/Debug/Bonsai.exe"
   msbuild.exe /nologo /v:m ./bin/Game.vcxproj
 
-  cp bin/Debug/Game.dll bin/Debug/GameLoadable.dll
+  mv bin/Debug/Game.dll bin/Debug/GameLoadable.dll
 
 else # Unix
 
