@@ -19,7 +19,7 @@ else # Unix
   cd build
   make "$@" 2>&1 && mv ../bin/libGame.so ../bin/libGameLoadable.so
 
-  [ $? -eq 0 ] && ../$BINARY > /dev/tty
+  # [ $? -eq 0 ] && ../$BINARY > /dev/tty
 
 fi
 
