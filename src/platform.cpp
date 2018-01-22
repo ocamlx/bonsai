@@ -34,8 +34,9 @@ debug_global os *Global_Os = 0;
 #include <sys/stat.h>
 
 
-global_variable s64 LastGameLibTime = 0;
+global_variable s64 LastGameLibTime;
 global_variable game_thread_callback_proc GameThreadCallback;
+
 b32
 GameLibIsNew(const char *LibPath)
 {
@@ -531,6 +532,8 @@ main(s32 NumArgs, char ** Args)
     BonsaiSwapBuffers(&Os);
 
     /* WaitForFrameTime(LastMs, 30.0f); */
+
+    FrameEnd();
 
     END_BLOCK("Frame End");
   }

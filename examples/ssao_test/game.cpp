@@ -211,6 +211,4 @@ GameUpdateAndRender(platform *Plat, game_state *GameState, hotkeys *Hotkeys)
 
   ClearFramebuffers(Plat->Graphics);
   DoGameplay(Plat, GameState, Hotkeys);
-
-  return;
 }
