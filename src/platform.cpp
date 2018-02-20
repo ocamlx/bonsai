@@ -405,10 +405,10 @@ void
 FrameEnd(void)
 {
   for( u32 DrawCountIndex = 0;
-       DrawCountIndex < GLOBAL_DRAW_CALL_LOCATION_COUNT;
+       DrawCountIndex < Global_DrawCallArrayLength;
        ++ DrawCountIndex)
   {
-     Global_DrawCallCounts[DrawCountIndex] = 0;
+     Global_DrawCalls[DrawCountIndex] = NullDrawCall;
   }
 }
 
