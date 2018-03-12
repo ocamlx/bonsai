@@ -21,6 +21,9 @@
 // TODO(Jesse): Axe this!!
 static gl_extensions *GL_Global = 0;
 
+debug_global platform *Global_Plat = 0;
+debug_global os *Global_Os = 0;
+
 #include <texture.cpp>
 #include <shader.cpp>
 #include <bonsai_vertex.h>
@@ -392,6 +395,8 @@ BindHotkeysToInput(hotkeys *Hotkeys, input *Input)
 
   Hotkeys->Player_Spawn = Input->Space.WasPressed;
 
+  Hotkeys->Debug_RedrawEveryPush = Input->F2.WasPressed;
+
   return;
 }
 
@@ -418,6 +423,9 @@ main(s32 NumArgs, char ** Args)
 
   os Os = {};
   Os.ContinueRunning = True;
+
+  Global_Plat = &Plat;
+  Global_Os = &Os;
 
   GameLibIsNew(GAME_LIB);  // Hack to initialize the LastGameLibTime static
 
@@ -457,7 +465,7 @@ main(s32 NumArgs, char ** Args)
   Plat.Graphics = GraphicsInit(GraphicsMemory);
   if (!Plat.Graphics) { Error("Initializing Graphics"); return False; }
 
-  game_state *GameState = GameInit(&Plat, GameMemory);
+  game_state *GameState = GameInit(&Plat, GameMemory, &Os);
   if (!GameState) { Error("Initializing Game State :( "); return False; }
 
   /*
@@ -481,6 +489,12 @@ main(s32 NumArgs, char ** Args)
     u64 FrameCycles = CurrentCycles - LastCycles;
     LastCycles = CurrentCycles;
 #endif
+
+    if (Plat.dt > 1000.0f)
+    {
+      Warn("DT exceeded 1s, truncating.");
+      Plat.dt = 1000.0f;
+    }
 
     ClearWasPressedFlags((input_event*)&Plat.Input);
     DEBUG_FRAME_BEGIN(&Hotkeys, Plat.dt, FrameCycles);
