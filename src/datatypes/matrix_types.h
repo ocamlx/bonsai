@@ -10,13 +10,6 @@ struct m4
     return Result;
   }
 
-  bool
-  operator==(m4 &M2)
-  {
-    NotImplemented;
-    return true;
-  }
-
   m4(v4 Row0, v4 Row1, v4 Row2, v4 Row3)
   {
     this->E[0] = Row0;

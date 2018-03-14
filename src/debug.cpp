@@ -6,6 +6,74 @@ debug_profile_scope NullScope = {};
 debug_global b32 DebugGlobal_RedrawEveryPush = 0;
 
 void
+PrintScopeTree(debug_profile_scope *Scope, s32 Depth = 0)
+{
+  if (!Scope)
+    return;
+
+  s32 CurDepth = Depth;
+
+  while (CurDepth--)
+  {
+    printf("%s", "  ");
+  }
+
+  if (Depth > 0)
+    printf("%s", " `- ");
+
+  printf("%d %s", Depth, Scope->Name);
+
+  debug_state *DebugState = GetDebugState();
+  if (DebugState->WriteScope == &Scope->Child)
+    printf(" %s", "<-- Child \n");
+  else if (DebugState->WriteScope == &Scope->Sibling)
+    printf(" %s", "<-- Sibling \n");
+  else
+    printf("%s", "\n");
+
+
+  PrintScopeTree(Scope->Child, Depth+1);
+  PrintScopeTree(Scope->Sibling, Depth);
+
+  return;
+}
+
+debug_profile_scope *
+GetProfileScope(debug_state *State)
+{
+  debug_profile_scope *Result = 0;
+#if 1
+  debug_profile_scope *Sentinel = &State->FreeScopeSentinel;
+
+  if (Sentinel->Child != Sentinel)
+  {
+    Result = Sentinel->Child;
+
+    Sentinel->Child = Sentinel->Child->Child;
+    Sentinel->Child->Child->Parent = Sentinel;
+    --State->FreeScopeCount;
+  }
+  else
+  {
+#if MEMPROTECT
+    State->Memory->MemProtect = False;
+#endif
+    Result = PUSH_STRUCT_CHECKED(debug_profile_scope, State->Memory, 1);
+#if MEMPROTECT
+    State->Memory->MemProtect = True;
+#endif
+  }
+#else
+    Result = PUSH_STRUCT_CHECKED(debug_profile_scope, State->Memory, 1);
+#endif
+
+  if (Result)
+    *Result = NullDebugProfileScope;
+
+  return Result;
+}
+
+void
 DebugRegisterArena(const char *Name, memory_arena *Arena)
 {
   /* debug_state *State = GetDebugState(); */
@@ -1335,14 +1403,14 @@ DoDebugFrameRecord(
 
         case RecordingMode_Record:
         {
-          NotImplemented;
+          NotImplemented();
           Log("Recording");
           //CopyArena(MainMemory, &State->RecordedMainMemory);
         } break;
 
         case RecordingMode_Playback:
         {
-          NotImplemented;
+          NotImplemented();
           Log("Playback");
           //CopyArena(&State->RecordedMainMemory, MainMemory);
         } break;
@@ -1365,7 +1433,7 @@ DoDebugFrameRecord(
 
     case RecordingMode_Record:
     {
-      NotImplemented;
+      NotImplemented();
       Assert(State->FramesRecorded < DEBUG_RECORD_INPUT_SIZE);
       Hotkeys->Debug_ToggleLoopedGamePlayback = False;
       State->Inputs[State->FramesRecorded++] = *Hotkeys;
@@ -1373,7 +1441,7 @@ DoDebugFrameRecord(
 
     case RecordingMode_Playback:
     {
-      NotImplemented;
+      NotImplemented();
       *Hotkeys = State->Inputs[State->FramesPlayedBack++];
 
       if (State->FramesPlayedBack == State->FramesRecorded)

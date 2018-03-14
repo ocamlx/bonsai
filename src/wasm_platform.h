@@ -1,7 +1,7 @@
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-NotImplemented;
+NotImplemented();
 typedef int PFNSWAPINTERVALPROC;
 
 #define GAME_LIB "./bin/libGameLoadable.so"
@@ -30,17 +30,23 @@ typedef int PFNSWAPINTERVALPROC;
 #define PrintConsole(Message) printf(Message)
 
 
-NotImplemented;
+NotImplemented();
 typedef int thread_id;
 typedef int semaphore;
 typedef int shared_lib;
 typedef int window;
 typedef int display;
 typedef int gl_context;
-NotImplemented;
+NotImplemented();
 
 inline void
 WakeThread( semaphore *Semaphore )
 {
-  NotImplemented;
+  NotImplemented();
+}
+
+inline uint64_t
+PlatformGetPageSize()
+{
+  return 4096;
 }

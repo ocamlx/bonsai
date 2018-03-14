@@ -105,7 +105,6 @@
 #define global_variable static __attribute__((unused))
 #define debug_global static __attribute__((unused))
 
-
 #define RuntimeBreak()
 
 #define Debug(...) printf(__VA_ARGS__);   printf("\n")

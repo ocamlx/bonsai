@@ -267,7 +267,7 @@ AllocatePlayer(platform *Plat, memory_arena *Memory)
 void
 SpawnEnemy(world *World, entity **WorldEntities, entity *Enemy, random_series *EnemyEntropy, model *GameModels)
 {
-  NotImplemented;
+  NotImplemented();
 #if 0
 #if DEBUG_PARTICLE_EFFECTS
   return;

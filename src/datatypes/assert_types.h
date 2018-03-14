@@ -7,13 +7,13 @@
 
 
 #if BONSAI_INTERNAL
-#define Assert(condition)
+#define Assert(condition) if (!(condition)) { RuntimeBreak(); }
 #else
 #define Assert(...)
 #endif
 
 #if BONSAI_INTERNAL
-#define NotImplemented Assert(!"Implement Meeeeee!!!")
+#define NotImplemented() RuntimeBreak()
 #else
-#define NotImplemented Implement Meeeeee!!!
+#define NotImplemented() Implement Meeeeee!!!
 #endif

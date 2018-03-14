@@ -1,5 +1,6 @@
 void BreakHere() { return; }
 
+#include <platform_constants.h>
 #include <assert_types.h>
 
 #ifdef _WIN32
@@ -11,8 +12,6 @@ void BreakHere() { return; }
 #else
 #error "INVALID BUILD TARGET SPECIFIED"
 #endif
-
-#include <platform_constants.h>
 
 #include <basic_types.h>
 #include <memory_types.h>

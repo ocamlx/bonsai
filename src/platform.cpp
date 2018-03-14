@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include <bonsai_types.h>
-
 #include <bonsai.h>
+
 #include <constants.hpp>
 
 #if BONSAI_WIN32
