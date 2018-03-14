@@ -4,8 +4,12 @@ void BreakHere() { return; }
 
 #ifdef _WIN32
 #include <win32_platform.h>
-#else
+#elif LINUX
 #include <unix_platform.h>
+#elif WASM
+#include <wasm_platform.h>
+#else
+#error "INVALID BUILD TARGET SPECIFIED"
 #endif
 
 #include <platform_constants.h>

@@ -582,7 +582,7 @@ RandomU32(random_series *Entropy)
   // Values from Knuth
   u64 A = 6364136223846793005;
   u64 B = 1442695040888963407;
-  u64 Mod = (1L << 63);
+  u64 Mod = (1L << 31);
 
   Entropy->Seed = ((A * Entropy->Seed) + B) % Mod;
 

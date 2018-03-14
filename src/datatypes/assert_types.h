@@ -7,8 +7,7 @@
 
 
 #if BONSAI_INTERNAL
-#define Assert(condition) \
-  if (!(condition)) { Debug(" ! Failed - '%s' on Line: %d in File: %s", #condition, __LINE__, __FILE__); RuntimeBreak(); }
+#define Assert(condition)
 #else
 #define Assert(...)
 #endif

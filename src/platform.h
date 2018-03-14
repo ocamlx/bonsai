@@ -1,6 +1,8 @@
 #ifndef BONSAI_PLATFORM_H
 #define BONSAI_PLATFORM_H
 
+#include <GL/glext.h>
+
 // FIXME(Jesse): Define per application!
 #define WORK_QUEUE_SIZE (2048)
 

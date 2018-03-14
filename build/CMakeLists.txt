@@ -78,16 +78,11 @@ if (WIN32)
 endif()
 
 
-# Generate GDB debug info
-if (UNIX)
-  add_definitions( -DLINUX=1 -ggdb )
-endif()
-
-
-
 add_definitions( -std=c++11 )
 
 if (UNIX)
+  # Generate GDB debug info
+  add_definitions( -DLINUX=1 -ggdb )
 
   set(GAME_COMPILED_LIB ${BIN}/libGame.so)
   set(GAME_LOADABLE_LIB ${BIN}/libGameLoadable.so)

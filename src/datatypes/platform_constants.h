@@ -41,19 +41,6 @@
 
 
 /*
- * Memory
- */
-
-#define MEMPROTECT (MEMPROTECT_OVERFLOW || MEMPROTECT_UNDERFLOW)
-#define MEMPROTECT_UNDERFLOW (0)
-#define MEMPROTECT_OVERFLOW (1)
-
-#if MEMPROTECT_UNDERFLOW && MEMPROTECT_OVERFLOW
-#error "Unfortunately, Underflow and Overflow protection at the same time is impossible"
-#endif
-
-
-/*
  *  MSVC
  */
 #ifdef _MSC_VER
@@ -69,11 +56,11 @@
     PrintConsole(Buffer); }
 
 
-#define Info(...)  PrintConsole("   Info - ");             \
-                   VariadicOutputDebugString(__VA_ARGS__); \
+#define Debug(...) VariadicOutputDebugString(__VA_ARGS__); \
                    PrintConsole("\n")
 
-#define Debug(...) VariadicOutputDebugString(__VA_ARGS__); \
+#define Info(...)  PrintConsole("   Info - ");             \
+                   VariadicOutputDebugString(__VA_ARGS__); \
                    PrintConsole("\n")
 
 #define Error(...) PrintConsole(" ! Error - ");            \
@@ -93,7 +80,7 @@
 /*
  *  GCC
  */
-#else
+#elif LINUX
 
 #define __FUNCTION_NAME__ __func__
 
@@ -101,15 +88,32 @@
 #define global_variable static __attribute__((unused))
 #define debug_global static __attribute__((unused))
 
-#define Info(...)  printf("   Info - ");  printf(__VA_ARGS__); printf("\n")
 #define Debug(...) printf(__VA_ARGS__);   printf("\n")
+
+#define Info(...)  printf("   Info - ");  printf(__VA_ARGS__); printf("\n")
 #define Error(...) printf(" ! Error - "); printf(__VA_ARGS__); printf("\n")
 #define Warn(...)  printf(" * Warn - "); printf(__VA_ARGS__); printf("\n")
 
 
 #define RuntimeBreak() raise(SIGTRAP)
 
+#elif WASM
 
-#endif // _MSC_VER
+#define __FUNCTION_NAME__ __func__
 
-#endif // BONSAI_PLAT_CONTANTS_H
+// Hush up gcc about unreferenced globals
+#define global_variable static __attribute__((unused))
+#define debug_global static __attribute__((unused))
+
+
+#define RuntimeBreak()
+
+#define Debug(...) printf(__VA_ARGS__);   printf("\n")
+
+#define Info(...)  printf("   Info - ");  printf(__VA_ARGS__); printf("\n")
+#define Error(...) printf(" ! Error - "); printf(__VA_ARGS__); printf("\n")
+#define Warn(...)  printf(" * Warn - "); printf(__VA_ARGS__); printf("\n")
+
+#endif
+
+#endif

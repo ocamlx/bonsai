@@ -717,7 +717,7 @@ DrawTexturedQuad(shader *SimpleTextureShader)
   texture *Texture = SimpleTextureShader->FirstUniform->Texture;
   SetViewport( V2(Texture->Dim.x, Texture->Dim.y)*Scale );
 
-  glUseProgram(SimpleTextureShader->ID);
+  GL_Global->glUseProgram(SimpleTextureShader->ID);
 
   BindShaderUniforms(SimpleTextureShader);
 
@@ -2512,7 +2512,7 @@ BufferWorld(world *World, graphics *Graphics, camera *Camera)
         if (GetDebugState()->Debug_RedrawEveryPush)
         {
           DrawGBufferToFullscreenQuad( Global_Plat, Graphics, WORLD_CHUNK_DIM);
-          glXSwapBuffers(Global_Os->Display, Global_Os->Window);
+          /* glXSwapBuffers(Global_Os->Display, Global_Os->Window); */
           RuntimeBreak();
           ClearFramebuffers(Graphics);
         }

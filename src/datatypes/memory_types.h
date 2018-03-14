@@ -1,5 +1,17 @@
 #include <sys/mman.h>
 
+#define MEMPROTECT_UNDERFLOW (0)
+#define MEMPROTECT_OVERFLOW (1)
+#define MEMPROTECT (MEMPROTECT_OVERFLOW || MEMPROTECT_UNDERFLOW)
+
+#if MEMPROTECT_UNDERFLOW && MEMPROTECT_OVERFLOW
+#error "Unfortunately, Underflow and Overflow protection at the same time is impossible"
+#endif
+
+#if MEMPROTECT && (!BONSAI_INTERNAL)
+#error "Memory protection only available in internal mode.
+#endif
+
 #define registered_memory_arena(Arena) \
   memory_arena *Arena = PlatformAllocateArena(); \
   DEBUG_REGISTER_ARENA(Arena);
@@ -46,7 +58,7 @@ struct memory_arena
   umm Pushes;
 
 #if MEMPROTECT
-  b32 MemProtect = true;
+  b32 MemProtect = 1;
 #endif
 
 #endif
