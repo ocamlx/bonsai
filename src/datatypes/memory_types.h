@@ -106,4 +106,3 @@ AllocateAndInitializeArena_(memory_arena *Arena, umm Size)
   return;
 }
 #endif
-
