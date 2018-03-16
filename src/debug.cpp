@@ -419,7 +419,10 @@ inline void
 BufferText(u64 Number, ui_render_group *Group, u32 ColorIndex)
 {
   char Buffer[32] = {};
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat"
   sprintf(Buffer, "%lu", Number);
+#pragma clang diagnostic pop
   BufferText(Buffer, Group, ColorIndex);
   return;
 }
@@ -577,7 +580,10 @@ inline void
 BufferColumn( u64 Value, u32 ColumnWidth, ui_render_group *Group, u32 ColorIndex)
 {
   char Buffer[32] = {};
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat"
   sprintf(Buffer, "%lu", Value);
+#pragma clang diagnostic pop
   {
     s32 Len = strlen(Buffer);
     s32 Pad = Max(ColumnWidth-Len, 0);

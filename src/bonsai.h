@@ -584,7 +584,12 @@ RandomU32(random_series *Entropy)
   // Values from Knuth
   u64 A = 6364136223846793005;
   u64 B = 1442695040888963407;
+
+// FIXME(Jesse): Why is emcc complaining about this??
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshift-count-overflow"
   u64 Mod = (1L << 63);
+#pragma clang diagnostic pop
 
   Entropy->Seed = ((A * Entropy->Seed) + B) % Mod;
 
