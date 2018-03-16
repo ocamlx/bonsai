@@ -77,13 +77,14 @@ BufferVertsDirect(
     return;
   }
 
-#if 1
+  s32 sizeofData = NumVerts * sizeof(v3);
+
+#if __SSE__
   __m128 mmScale = _mm_set_ps(0, Scale.z, Scale.y, Scale.x);
   __m128 mmOffset = _mm_set_ps(0, Offset.z, Offset.y, Offset.x);
 
   Assert(NumVerts % VERTS_PER_FACE == 0);
 
-  s32 sizeofData = NumVerts * sizeof(v3);
   memcpy( &Dest->Normals[Dest->CurrentIndex],  Normals,         sizeofData );
   memcpy( &Dest->Colors[Dest->CurrentIndex],   VertColors,      sizeofData );
 
@@ -140,17 +141,22 @@ BufferVertsDirect(
 #else
 
   // Left this here for futrue benchmarking.  The memcpy path is fastest by ~2x
-#if 1
+  //
+  // This slow path is used by the WASM target at the moment because it lacks
+  // SIMD support.
   for ( s32 VertIndex = 0;
         VertIndex < NumVerts;
         ++VertIndex )
   {
-    Dest->VertexData[Dest->CurrentIndex] = VertsPositions[VertIndex]*Scale + Offset;
-    Dest->NormalData[Dest->CurrentIndex] = Normals[VertIndex];
-    Dest->ColorData[Dest->CurrentIndex] = VertColors[VertIndex];
+    Dest->Verts[Dest->CurrentIndex] = VertsPositions[VertIndex]*Scale + Offset;
     ++Dest->CurrentIndex;
   }
-#else
+
+  memcpy( &Dest->Normals[Dest->CurrentIndex],  Normals,         sizeofData );
+  memcpy( &Dest->Colors[Dest->CurrentIndex],   VertColors,      sizeofData );
+
+
+#if 0
   s32 sizeofData = NumVerts * sizeof(v3);
   memcpy( &Dest->VertexData[Dest->CurrentIndex],  VertsPositions,  sizeofData );
   memcpy( &Dest->NormalData[Dest->CurrentIndex],  Normals,         sizeofData );

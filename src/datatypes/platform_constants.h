@@ -105,7 +105,8 @@
 #define global_variable static __attribute__((unused))
 #define debug_global static __attribute__((unused))
 
-#define RuntimeBreak()
+#include <assert.h>
+#define RuntimeBreak() assert(false);
 
 #define Debug(...) printf(__VA_ARGS__);   printf("\n")
 
@@ -113,6 +114,8 @@
 #define Error(...) printf(" ! Error - "); printf(__VA_ARGS__); printf("\n")
 #define Warn(...)  printf(" * Warn - "); printf(__VA_ARGS__); printf("\n")
 
+#else
+#error INVALID_PLATFORM
 #endif
 
 #endif

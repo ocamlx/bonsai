@@ -1,8 +1,11 @@
+#include <emscripten.h>
+
+/* extern "C" { */
+/*    #include "html5.h" // emscripten module */
+/* } */
+
 #include <GL/gl.h>
 #include <GL/glext.h>
-
-NotImplemented();
-typedef int PFNSWAPINTERVALPROC;
 
 #define GAME_LIB "./bin/libGameLoadable.so"
 
@@ -10,12 +13,12 @@ typedef int PFNSWAPINTERVALPROC;
 
 #define EXPORT extern "C" __attribute__((visibility("default")))
 
-#define CompleteAllWrites  asm volatile("" ::: "memory"); _mm_sfence()
+#define CompleteAllWrites NotImplemented()
 
 /*
- * glX Business
+ * glWasm Business
  */
-#define bonsaiGlGetProcAddress(procName) glXGetProcAddress((GLubyte*)procName)
+#define bonsaiGlGetProcAddress(procName)
 /* typedef PFNGLXSWAPINTERVALEXTPROC PFNSWAPINTERVALPROC; */
 
 #define GlobalCwdBufferLength 2048
@@ -29,24 +32,18 @@ typedef int PFNSWAPINTERVALPROC;
 // wrapper that does some additional crazyness on Win32
 #define PrintConsole(Message) printf(Message)
 
-
-NotImplemented();
+// FIXME(Jesse): NotImplemented
 typedef int thread_id;
 typedef int semaphore;
 typedef int shared_lib;
 typedef int window;
 typedef int display;
 typedef int gl_context;
-NotImplemented();
+typedef int PFNSWAPINTERVALPROC;
+// FIXME(Jesse): NotImplemented
 
 inline void
 WakeThread( semaphore *Semaphore )
 {
   NotImplemented();
-}
-
-inline uint64_t
-PlatformGetPageSize()
-{
-  return 4096;
 }

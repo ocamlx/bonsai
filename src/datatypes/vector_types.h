@@ -1,5 +1,7 @@
+#if __SSE__
 #include <immintrin.h>
 #include <xmmintrin.h>
+#endif
 
 struct v2i
 {
@@ -855,13 +857,15 @@ operator-=(v3& A, v3 B)
   return(A);
 }
 
+#if __SSE__
 union f32_reg {
   r32 F[4];
   __m128 Sse;
 };
+#endif
 
 
-#define SIMD_OPERATORS 1
+#define SIMD_OPERATORS __SSE__
 #define SANITY_CHECK_SIMD_OPERATORS 1
 inline v3
 operator*(v3 A, v3 B)

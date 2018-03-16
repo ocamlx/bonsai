@@ -5,15 +5,15 @@
 #endif
 
 
-
 #if BONSAI_INTERNAL
-#define Assert(condition) if (!(condition)) { RuntimeBreak(); }
+#define Assert(condition)  \
+  if (!(condition)) { Debug(" ! Failed - '%s' on Line: %d in File: %s", #condition, __LINE__, __FILE__); RuntimeBreak(); }
 #else
 #define Assert(...)
 #endif
 
 #if BONSAI_INTERNAL
-#define NotImplemented() RuntimeBreak()
+#define NotImplemented(...) Assert(!"IMPLEMENT MEEE!!!!!");
 #else
 #define NotImplemented() Implement Meeeeee!!!
 #endif

@@ -11,8 +11,12 @@
 
 #if BONSAI_WIN32
 #include <win32_platform.cpp>
-#else
+#elif WASM
+#include <wasm_platform.cpp>
+#elif LINUX
 #include <unix_platform.cpp>
+#else
+#error INVALID_PLATFORM
 #endif
 
 #include <platform.h>
@@ -145,7 +149,8 @@ Length(char *Str)
   return Result;
 }
 
-#define DefGlProc(ProcType, ProcName) Gl->ProcName = (ProcType)bonsaiGlGetProcAddress(#ProcName); Assert(Gl->ProcName)
+#define DefGlProc(ProcType, ProcName) Gl->ProcName = ProcName
+
 void
 InitializeOpenGlExtensions(gl_extensions *Gl, os *Os)
 {
@@ -257,6 +262,7 @@ PlatformInit(platform *Plat, memory_arena *Memory)
 
   u32 LogicalCoreCount = GetLogicalCoreCount();
   u32 ThreadCount = LogicalCoreCount -1 + DEBUG_THREAD_COUNT_BIAS; // -1 because we already have a main thread
+  Assert(ThreadCount >= 0);
 
   Info("Detected %d Logical cores, creating %d threads", LogicalCoreCount, ThreadCount);
 
@@ -319,7 +325,8 @@ FileExists(const char *Path)
 b32
 SearchForProjectRoot(void)
 {
-  b32 Result = False;
+  b32 Result = True;;
+#if 0
 
   if (FileExists(".root_marker"))
   {
@@ -338,6 +345,7 @@ SearchForProjectRoot(void)
 
   }
 
+#endif
   return Result;
 }
 
@@ -420,8 +428,8 @@ main(s32 NumArgs, char ** Args)
 {
   Info("Initializing Bonsai");
 
-  if (!SearchForProjectRoot()) { Error("Couldn't find root dir, exiting."); return False; }
-  Info("Found Bonsai Root : %s", GetCwd() );
+  /* if (!SearchForProjectRoot()) { Error("Couldn't find root dir, exiting."); return False; } */
+  /* Info("Found Bonsai Root : %s", GetCwd() ); */
 
   registered_memory_arena(DebugMemory);
   registered_memory_arena(PlatMemory);
@@ -519,6 +527,7 @@ main(s32 NumArgs, char ** Args)
 
     BindHotkeysToInput(&Hotkeys, &Plat.Input);
 
+#if !WASM
     if ( GameLibIsNew(GAME_LIB) )
     {
       CloseLibrary(GameLib);
@@ -530,6 +539,7 @@ main(s32 NumArgs, char ** Args)
 
       InitGlobals(&Plat);
     }
+#endif
 
 
     /* DEBUG_FRAME_RECORD(Debug_RecordingState, &Hotkeys); */

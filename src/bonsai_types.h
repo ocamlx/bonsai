@@ -1,5 +1,7 @@
 void BreakHere() { return; }
 
+#define INVALID_PLATFORM "INVALID BUILD TARGET SPECIFIED"
+
 #include <platform_constants.h>
 #include <assert_types.h>
 
@@ -10,7 +12,7 @@ void BreakHere() { return; }
 #elif WASM
 #include <wasm_platform.h>
 #else
-#error "INVALID BUILD TARGET SPECIFIED"
+#error INVALID_PLATFORM
 #endif
 
 #include <basic_types.h>

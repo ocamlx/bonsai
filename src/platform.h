@@ -235,7 +235,6 @@ DumpGlErrorEnum(int Error)
   return;
 }
 
-
 inline void
 UpdateLogicalFrameCount(logical_frame_state *State, r32 dt)
 {
