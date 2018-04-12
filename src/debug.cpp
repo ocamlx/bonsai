@@ -52,6 +52,16 @@ CheckAndClearFramebuffer();
 void
 BindShaderUniforms(shader *Shader);
 
+void
+GenBuffers(u32 NumBuffers, u32 *BufferName)
+{
+  Print(NumBuffers);
+  GL_Global->glGenBuffers(NumBuffers, BufferName);
+  Print(*BufferName);
+  Assert(*BufferName);
+  return;
+}
+
 b32
 InitDebugOverlayFramebuffer(debug_text_render_group *RG, memory_arena *DebugArena, const char *DebugFont)
 {
@@ -65,12 +75,17 @@ InitDebugOverlayFramebuffer(debug_text_render_group *RG, memory_arena *DebugAren
 
   FramebufferTexture(&RG->FBO, RG->CompositedTexture);
 
-  GL_Global->glGenBuffers(1, &RG->SolidUIVertexBuffer);
-  GL_Global->glGenBuffers(1, &RG->SolidUIColorBuffer);
+  GenBuffers(1, &RG->SolidUIVertexBuffer);
+  AssertNoGlErrors;
+  GenBuffers(1, &RG->SolidUIColorBuffer);
+  AssertNoGlErrors;
 
-  GL_Global->glGenBuffers(1, &RG->VertexBuffer);
-  GL_Global->glGenBuffers(1, &RG->UVBuffer);
-  GL_Global->glGenBuffers(1, &RG->ColorBuffer);
+  GenBuffers(1, &RG->VertexBuffer);
+  AssertNoGlErrors;
+  GenBuffers(1, &RG->UVBuffer);
+  AssertNoGlErrors;
+  GenBuffers(1, &RG->ColorBuffer);
+  AssertNoGlErrors;
 
   RG->Text2DShader = LoadShaders("TextVertexShader.vertexshader",
                                  "TextVertexShader.fragmentshader", DebugArena);
@@ -116,15 +131,18 @@ InitScopeTree(debug_state *State, debug_scope_tree *WriteScopeTree)
 shader
 MakeSolidUIShader(memory_arena *DebugMemory)
 {
+  AssertNoGlErrors;
   shader SimpleTextureShader = LoadShaders( "SimpleColor.vertexshader",
                                             "SimpleColor.fragmentshader",
                                             DebugMemory );
+  AssertNoGlErrors;
   return SimpleTextureShader;
 }
 
 void
 InitDebugState(platform *Plat, memory_arena *DebugMemory)
 {
+  Info("Initializing Debug State");
   GlobalDebugState = &Plat->DebugState;
   GlobalDebugState->Memory = DebugMemory;
   GlobalDebugState->GetCycleCount = Plat->GetCycleCount;
@@ -144,6 +162,7 @@ InitDebugState(platform *Plat, memory_arena *DebugMemory)
   GlobalDebugState->TextRenderGroup.SolidUIShader = MakeSolidUIShader(GlobalDebugState->Memory);
 
   GlobalDebugState->Initialized = True;
+  GlobalDebugState->DebugDoScopeProfiling = True;
 
   return;
 }
@@ -161,16 +180,19 @@ FlushBuffer(debug_text_render_group *RG, untextured_2d_geometry_buffer *Buffer, 
 {
   TIMED_FUNCTION();
 
+  // This is insanely slow (> 1s) on the webgl platform when the buffer has
+  // nothing to push to the card.
+  if (Buffer->CurrentIndex == 0) return;
+
   GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
   SetViewport(V2(SCR_WIDTH, SCR_HEIGHT));
   UseShader(&RG->SolidUIShader);
 
-  BEGIN_CARD_BUFFERING();
-    BUFFER_VERTS_TO_CARD(RG->SolidUIVertexBuffer, Buffer);
-    BUFFER_COLORS_TO_CARD(RG->SolidUIColorBuffer, Buffer);
-  END_CARD_BUFFERING();
+  BufferVertsToCard(RG->SolidUIVertexBuffer, Buffer, 0);
+  BufferColorsToCard(RG->SolidUIColorBuffer, Buffer, 1);
 
   Draw(Buffer->CurrentIndex);
+  Print(Buffer->CurrentIndex);
   Buffer->CurrentIndex = 0;
 
   GL_Global->glDisableVertexAttribArray(0);
@@ -193,11 +215,9 @@ FlushBuffer(debug_text_render_group *RG, textured_2d_geometry_buffer *Geo, v2 Vi
   glBindTexture(GL_TEXTURE_2D, RG->FontTexture.ID);
   GL_Global->glUniform1i(RG->TextureUniformID, 0);
 
-  BEGIN_CARD_BUFFERING();
-    BUFFER_VERTS_TO_CARD(RG->SolidUIVertexBuffer, Geo);
-    BUFFER_UVS_TO_CARD(RG->UVBuffer, Geo);
-    BUFFER_COLORS_TO_CARD(RG->SolidUIColorBuffer, Geo);
-  END_CARD_BUFFERING();
+  BufferVertsToCard(RG->SolidUIVertexBuffer, Geo, 0);
+  BUFFER_UVS_TO_CARD(RG->UVBuffer, Geo, 1);
+  BufferColorsToCard(RG->SolidUIColorBuffer, Geo, 2);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -803,6 +823,7 @@ BufferFirstCallToEach(ui_render_group *Group, debug_profile_scope *Scope, debug_
 void
 DebugFrameBegin(hotkeys *Hotkeys, r32 Dt, u64 Cycles)
 {
+  Info("Debug Frame Begin");
   debug_state *State = GetDebugState();
 
   if ( Hotkeys->Debug_RedrawEveryPush )
@@ -1263,7 +1284,7 @@ DebugFrameEnd(platform *Plat, u64 FrameCycles)
 
     BufferColumn(Dt.Min, 6, &Group, WHITE);
 
-  END_BLOCK("Status Bar");
+  END_BLOCK("Draw Status Bar");
 
   SetFontSize(&Layout, 32);
   NewLine(&Layout);

@@ -1,3 +1,6 @@
+#ifndef bonsai_types_h
+#define bonsai_types_h
+
 void BreakHere() { return; }
 
 #define INVALID_PLATFORM "INVALID BUILD TARGET SPECIFIED"
@@ -34,3 +37,5 @@ void BreakHere() { return; }
 #include <debug_print.h>
 
 #include <bonsai_vertex.h>
+
+#endif

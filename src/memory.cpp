@@ -12,6 +12,13 @@ u8*
 PushSize(memory_arena *Arena, umm SizeIn)
 {
 
+#if 1
+  u8* Result = (u8*)malloc(SizeIn);
+  memset(Result, 0, SizeIn);
+  return Result;
+
+#else
+ 
 #if BONSAI_INTERNAL
   ++Arena->Pushes;
 #endif
@@ -99,6 +106,7 @@ PushSize(memory_arena *Arena, umm SizeIn)
 #endif
 
   return Result;
+#endif
 }
 void*
 PushStruct(memory_arena *Memory, umm sizeofStruct)

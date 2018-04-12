@@ -1,3 +1,6 @@
+#ifndef bonsai_h
+#define bonsai_h
+
 #include <bonsai_math.h>
 
 #include <perlin.h>
@@ -585,11 +588,8 @@ RandomU32(random_series *Entropy)
   u64 A = 6364136223846793005;
   u64 B = 1442695040888963407;
 
-// FIXME(Jesse): Why is emcc complaining about this??
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshift-count-overflow"
-  u64 Mod = (1L << 63);
-#pragma clang diagnostic pop
+  u64 One = 1;
+  u64 Mod = (One << 63);
 
   Entropy->Seed = ((A * Entropy->Seed) + B) % Mod;
 
@@ -619,6 +619,7 @@ RandomUnilateral(random_series *Entropy)
 {
   u32 Random = RandomU32(Entropy);
   r32 Result = (r32)Random/(r32)UINT_MAX;
+
   return Result;
 }
 
@@ -874,13 +875,15 @@ AllocateMesh(untextured_3d_geometry_buffer *Mesh, u32 NumVerts, memory_arena *Me
 chunk_data*
 AllocateChunk(memory_arena *WorldStorage, chunk_dimension Dim)
 {
+  u64 ChunkVolume = Volume(Dim);
+
   chunk_data *Result = PUSH_STRUCT_CHECKED(chunk_data, WorldStorage, 1);;
-  Result->Voxels = PUSH_STRUCT_CHECKED(voxel, WorldStorage , Volume(Dim));
+  Result->Voxels = PUSH_STRUCT_CHECKED(voxel, WorldStorage , ChunkVolume);
 
   // TODO(Jesse): Allocate this based on actual need?
   AllocateMesh(&Result->Mesh, 15000, WorldStorage);
 
-  ZeroChunk(Result, Volume(Dim));
+  ZeroChunk(Result, ChunkVolume);
 
   return Result;
 }
@@ -1124,3 +1127,5 @@ IsInsideDim( voxel_position Dim, v3 P )
   b32 Result = IsInsideDim(Dim, Voxel_Position(P) );
   return Result;
 }
+
+#endif

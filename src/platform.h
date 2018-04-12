@@ -52,6 +52,7 @@ struct thread_startup_params
 
 struct gl_extensions
 {
+  PFNGLGENTEXTURESPROC glGenTextures;
   PFNGLCREATESHADERPROC glCreateShader;
   PFNGLSHADERSOURCEPROC glShaderSource;
   PFNGLCOMPILESHADERPROC glCompileShader;
@@ -150,8 +151,6 @@ struct platform
   r32 dt;
   s32 WindowWidth;
   s32 WindowHeight;
-
-  const char *GlslVersion;
 
   input Input;
 

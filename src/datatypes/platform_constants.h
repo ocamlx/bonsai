@@ -106,12 +106,15 @@
 #define debug_global static __attribute__((unused))
 
 #include <assert.h>
-#define RuntimeBreak() assert(false);
+#define RuntimeBreak() assert(false)
 
 #define Debug(...) printf(__VA_ARGS__);   printf("\n")
 
 #define Info(...)  printf("   Info - ");  printf(__VA_ARGS__); printf("\n")
-#define Error(...) printf(" ! Error - "); printf(__VA_ARGS__); printf("\n")
+
+#define Error(...) printf(" ! Error - "); printf(__VA_ARGS__); printf("\n"); \
+  printf("    `->  %s:%d - %s \n", __FILE__, __LINE__, __func__)
+
 #define Warn(...)  printf(" * Warn - "); printf(__VA_ARGS__); printf("\n")
 
 #else

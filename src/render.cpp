@@ -1,3 +1,6 @@
+#ifndef bonsai_render_cpp
+#define bonsai_render_cpp
+
 #include <cstring>
 #include <csignal>
 
@@ -23,7 +26,7 @@ global_variable m4 NdcToScreenSpace = {
 
 void
 Init_Global_QuadVertexBuffer() {
-  GL_Global->glGenBuffers(1, &Global_QuadVertexBuffer);
+  GenBuffers(1, &Global_QuadVertexBuffer);
   Assert(Global_QuadVertexBuffer);
 
   GL_Global->glBindBuffer(GL_ARRAY_BUFFER, Global_QuadVertexBuffer);
@@ -78,20 +81,45 @@ texture *
 GenTexture(v2i Dim, memory_arena *Mem)
 {
   texture *Texture = PUSH_STRUCT_CHECKED(texture, Mem, 1);
+  Assert(Texture);
+
   Texture->Dim = Dim;
 
-  glGenTextures(1, &Texture->ID);
+  // FIXME(Jesse): Can someone explain to me why I cannot pass a pointer to a
+  // heap allocated u32 to GenTextures?! ie. The ID from the texture pointer
+  // allocated above ?!
+  // GL_Global->glGenTextures(1, &Texture->ID);
+
+  // This also does not work.
+  /* u32 *Tex = PUSH_STRUCT_CHECKED(u32, Mem, 1); */
+  /* GL_Global->glGenTextures(1, &Tex); */
+  /* Texture->ID = Tex; */
+  /* Assert(Texture->ID); */
+
+  u32 Tex = {};
+  GL_Global->glGenTextures(1, &Tex);
+  Texture->ID = Tex;
   Assert(Texture->ID);
 
   glBindTexture(GL_TEXTURE_2D, Texture->ID);
+  AssertNoGlErrors;
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  AssertNoGlErrors;
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  AssertNoGlErrors;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  AssertNoGlErrors;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  AssertNoGlErrors;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+  AssertNoGlErrors;
   /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE); */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+  AssertNoGlErrors;
+
+  AssertNoGlErrors;
 
   return Texture;
 }
@@ -131,16 +159,25 @@ texture *
 MakeDepthTexture(v2i Dim, memory_arena *Mem)
 {
   texture *Texture = GenTexture(Dim, Mem);
+  AssertNoGlErrors;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F,
     Texture->Dim.x, Texture->Dim.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+  AssertNoGlErrors;
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  // FIXME(Jesse): GL ES 2/3 Don't support borders apparently.  Changing to
+  // clamp_to_edge for now.  Gotta implement cascaded shadow maps anyhow.
+  //
+  /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); */
+  /* glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); */
+  /* r32 BorderColors[4] = {1}; */
+  /* glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &BorderColors[0]); */
+  /* AssertNoGlErrors; */
 
-  r32 BorderColors[4] = {1};
-  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &BorderColors[0]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   glBindTexture(GL_TEXTURE_2D, 0);
+  AssertNoGlErrors;
 
   return Texture;
 }
@@ -243,9 +280,11 @@ BasicTypeUniformAllocators(r32, R32)
 shader
 MakeSimpleTextureShader(texture *Texture, memory_arena *GraphicsMemory)
 {
+  AssertNoGlErrors;
   shader SimpleTextureShader = LoadShaders( "Passthrough.vertexshader",
                                             "SimpleTexture.fragmentshader",
                                             GraphicsMemory );
+  AssertNoGlErrors;
 
   SimpleTextureShader.FirstUniform = GetUniform(GraphicsMemory, &SimpleTextureShader, Texture, "Texture");
 
@@ -259,7 +298,9 @@ MakeLightingShader(memory_arena *GraphicsMemory,
     g_buffer_textures *gTextures, texture *ShadowMap, texture *Ssao,
     m4 *ViewProjection, m4 *ShadowMVP, game_lights *Lights, camera *Camera)
 {
+  AssertNoGlErrors;
   shader Shader = LoadShaders( "Lighting.vertexshader", "Lighting.fragmentshader", GraphicsMemory);
+  AssertNoGlErrors;
 
   shader_uniform **Current = &Shader.FirstUniform;
 
@@ -334,13 +375,24 @@ g_buffer_render_group *
 CreateGbuffer(memory_arena *Memory)
 {
   g_buffer_render_group *gBuffer = PUSH_STRUCT_CHECKED(g_buffer_render_group, Memory, 1);
+
+  g_buffer_render_group ZeroBuffer = {};
+
   gBuffer->FBO = GenFramebuffer();
   gBuffer->ViewProjection = IdentityMatrix;
   gBuffer->ShadowMVP = IdentityMatrix;
 
-  GL_Global->glGenBuffers(1, &gBuffer->vertexbuffer);
-  GL_Global->glGenBuffers(1, &gBuffer->colorbuffer);
-  GL_Global->glGenBuffers(1, &gBuffer->normalbuffer);
+  GenBuffers(1, &ZeroBuffer.vertexbuffer);
+  GenBuffers(1, &ZeroBuffer.colorbuffer);
+  GenBuffers(1, &ZeroBuffer.normalbuffer);
+
+  gBuffer->vertexbuffer = ZeroBuffer.vertexbuffer;
+  gBuffer->colorbuffer = ZeroBuffer.colorbuffer;
+  gBuffer->normalbuffer = ZeroBuffer.normalbuffer;
+
+  Print(gBuffer->vertexbuffer);
+  Print(gBuffer->colorbuffer);
+  Print(gBuffer->normalbuffer);
 
   return gBuffer;
 }
@@ -394,8 +446,10 @@ CheckAndClearFramebuffer()
 shader
 CreateGbufferShader(memory_arena *GraphicsMemory, m4 *ViewProjection, camera *Camera)
 {
+  AssertNoGlErrors;
   shader Shader = LoadShaders( "gBuffer.vertexshader",
                                "gBuffer.fragmentshader", GraphicsMemory);
+  AssertNoGlErrors;
 
   shader_uniform **Current = &Shader.FirstUniform;
 
@@ -418,8 +472,10 @@ shader
 MakeSsaoShader(memory_arena *GraphicsMemory, g_buffer_textures *gTextures,
     texture *SsaoNoiseTexture, v3 *SsaoNoiseTile, m4 *ViewProjection)
 {
+  AssertNoGlErrors;
   shader Shader = LoadShaders( "Passthrough.vertexshader",
                                "Ao.fragmentshader", GraphicsMemory);
+  AssertNoGlErrors;
 
   shader_uniform **Current = &Shader.FirstUniform;
 
@@ -506,12 +562,17 @@ PushLight(game_lights *Lights, v3 Position, light_type Type)
 b32
 InitializeShadowBuffer(shadow_render_group *SG, memory_arena *GraphicsMemory)
 {
+  AssertNoGlErrors;
   // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
   GL_Global->glGenFramebuffers(1, &SG->FramebufferName);
+  AssertNoGlErrors;
   GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, SG->FramebufferName);
+  AssertNoGlErrors;
 
   SG->ShadowMap = MakeDepthTexture( V2i(SHADOW_MAP_RESOLUTION_X, SHADOW_MAP_RESOLUTION_Y), GraphicsMemory);
+  AssertNoGlErrors;
   GL_Global->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, SG->ShadowMap->ID, 0);
+  AssertNoGlErrors;
 
   // TODO(Jesse): Not present on ES2 .. should we use them?
   // No color output in the bound framebuffer, only depth.
@@ -519,9 +580,12 @@ InitializeShadowBuffer(shadow_render_group *SG, memory_arena *GraphicsMemory)
   /* glReadBuffer(GL_NONE); */
 
   // For debug-only visualization of this texture
+  AssertNoGlErrors;
   SG->DebugTextureShader = MakeSimpleTextureShader(SG->ShadowMap, GraphicsMemory);
 
+  AssertNoGlErrors;
   SG->DepthShader = LoadShaders( "DepthRTT.vertexshader", "DepthRTT.fragmentshader", GraphicsMemory);
+  AssertNoGlErrors;
   SG->MVP_ID = GetShaderUniform(&SG->DepthShader, "depthMVP");
 
   if(GL_Global->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -597,6 +661,7 @@ GraphicsInit(memory_arena *GraphicsMemory)
   AoGroup->SsaoKernelUniform = GetShaderUniform(&AoGroup->Shader, "SsaoKernel");
 
   { // To keep these here or not to keep these here..
+  AssertNoGlErrors;
     gBuffer->DebugColorTextureShader    = MakeSimpleTextureShader(gBuffer->Textures->Color    , GraphicsMemory);
     gBuffer->DebugNormalTextureShader   = MakeSimpleTextureShader(gBuffer->Textures->Normal   , GraphicsMemory);
     gBuffer->DebugPositionTextureShader = MakeSimpleTextureShader(gBuffer->Textures->Position , GraphicsMemory);
@@ -820,28 +885,38 @@ void
 RenderWorldToGBuffer(untextured_3d_geometry_buffer *Mesh, g_buffer_render_group *RG)
 {
   TIMED_FUNCTION();
+  AssertNoGlErrors;
   GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, RG->FBO.ID);
   GL_Global->glUseProgram(RG->gBufferShader.ID);
+  AssertNoGlErrors;
 
   SetViewport( V2(SCR_WIDTH, SCR_HEIGHT) );
 
+  AssertNoGlErrors;
   BindShaderUniforms(&RG->gBufferShader);
 
+  AssertNoGlErrors;
   TIMED_BLOCK("gBuffer - Bind and buffer data");
-    BEGIN_CARD_BUFFERING();
-      BUFFER_VERTS_TO_CARD(RG->vertexbuffer, Mesh);
-      BUFFER_COLORS_TO_CARD(RG->colorbuffer, Mesh);
-      BUFFER_NORMALS_TO_CARD(RG->normalbuffer, Mesh);
-    END_CARD_BUFFERING();
+    u32 AttributeIndex = 0;
+    BufferVertsToCard(RG->vertexbuffer, Mesh, AttributeIndex++);
+  AssertNoGlErrors;
+    BufferColorsToCard(RG->colorbuffer, Mesh, AttributeIndex++);
+  AssertNoGlErrors;
+    BufferNormalsToCard(RG->normalbuffer, Mesh, AttributeIndex++);
+  AssertNoGlErrors;
   END_BLOCK("gBuffer - Bind and buffer data");
 
+  AssertNoGlErrors;
   Draw(Mesh->CurrentIndex);
   Mesh->CurrentIndex = 0;
 
+
+  AssertNoGlErrors;
   GL_Global->glDisableVertexAttribArray(0);
   GL_Global->glDisableVertexAttribArray(1);
   GL_Global->glDisableVertexAttribArray(2);
 
+  AssertNoGlErrors;
   return;
 }
 
@@ -850,8 +925,10 @@ RenderGBuffer(untextured_3d_geometry_buffer *Mesh, graphics *Graphics)
 {
   TIMED_FUNCTION();
 
+  AssertNoGlErrors;
   RenderShadowMap(Mesh, Graphics);
 
+  AssertNoGlErrors;
   RenderWorldToGBuffer(Mesh, Graphics->gBuffer);
 
   AssertNoGlErrors;
@@ -870,10 +947,8 @@ RenderPostBuffer(post_processing_group *PostGroup, untextured_3d_geometry_buffer
   BindShaderUniforms(&PostGroup->Shader);
 
   TIMED_BLOCK("PostBuffer - Bind and buffer data");
-    BEGIN_CARD_BUFFERING();
-      BUFFER_VERTS_TO_CARD(PostGroup->VertexBuffer, Mesh);
-      BUFFER_COLORS_TO_CARD(PostGroup->ColorBuffer, Mesh);
-    END_CARD_BUFFERING();
+    BufferVertsToCard(PostGroup->VertexBuffer, Mesh, 0);
+    BufferColorsToCard(PostGroup->ColorBuffer, Mesh, 1);
   END_BLOCK("PostBuffer - Bind and buffer data");
 
   Draw(Mesh->CurrentIndex);
@@ -2544,3 +2619,5 @@ BufferEntities( entity **EntityTable, untextured_3d_geometry_buffer *Mesh,
   }
 
 }
+
+#endif

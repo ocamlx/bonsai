@@ -57,11 +57,11 @@ struct debug_scope_tree
 
 enum debug_ui_type
 {
-  DebugUIType_None,
-
   DebugUIType_CallGraph,
+
   DebugUIType_MemoryHud,
   DebugUIType_DrawCalls,
+  DebugUIType_None,
 
   DebugUIType_Count
 };
@@ -167,7 +167,7 @@ struct debug_timed_function
   {
     debug_state *DebugState = GetDebugState();
     if (!DebugState->DebugDoScopeProfiling) return;
-    Assert (DebugState->WriteScope);
+    if (!DebugState->WriteScope) { Warn("No Debug Write scope"); return; }
 
     ++DebugState->NumScopes;
 
@@ -197,8 +197,7 @@ struct debug_timed_function
     debug_state *DebugState = GetDebugState();
     if (!DebugState->DebugDoScopeProfiling) return;
     if (!this->Scope) return;
-
-    Assert (DebugState->WriteScope);
+    if (!DebugState->WriteScope) { return; }
 
     u64 EndingCycleCount = DebugState->GetCycleCount(); // Intentionally first
     u64 CycleCount = (EndingCycleCount - this->StartingCycleCount);

@@ -2,9 +2,6 @@
 #include <bonsai_types.h>
 #include <bonsai.h>
 
-debug_global os *Global_Os = 0;
-debug_global platform *Global_Plat = 0;
-
 #include <globals.h>
 
 global_variable r32 GlobalLightTheta = 0;
@@ -31,12 +28,9 @@ DoGameplay(platform *Plat, game_state *GameState, hotkeys *Hotkeys)
 {
   TIMED_FUNCTION();
 
-  world *World = GameState->World;
-
-  chunk_dimension WorldChunkDim = World->ChunkDim;
-
-  graphics *Graphics = Plat->Graphics;
-
+  world *World                   = GameState->World;
+  chunk_dimension WorldChunkDim  = World->ChunkDim;
+  graphics *Graphics             = Plat->Graphics;
   g_buffer_render_group *gBuffer = Graphics->gBuffer;
   ao_render_group *AoGroup       = Graphics->AoGroup;
   shadow_render_group *SG        = Graphics->SG;
@@ -84,9 +78,7 @@ DoGameplay(platform *Plat, game_state *GameState, hotkeys *Hotkeys)
     }
 
     RenderGBuffer(&World->Mesh, Graphics);
-
     RenderAoTexture(AoGroup);
-
     DrawGBufferToFullscreenQuad( Plat, Graphics, World->ChunkDim);
 
   #if DEBUG_DRAW_SHADOW_MAP_TEXTURE

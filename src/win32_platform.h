@@ -6,7 +6,7 @@
 #include <WinBase.h>
 #include <Wingdi.h>
 
-#include <GL/gl.h>
+#include <GL/glcorearb.h>
 #include <GL/glext.h>
 #include <GL/wglext.h>
 

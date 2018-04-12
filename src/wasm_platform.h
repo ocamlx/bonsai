@@ -1,10 +1,10 @@
 #include <emscripten.h>
 
-/* extern "C" { */
-/*    #include "html5.h" // emscripten module */
-/* } */
+extern "C" {
+   #include "html5.h" // emscripten module
+}
 
-#include <GL/gl.h>
+#include <GL/glcorearb.h>
 #include <GL/glext.h>
 
 #define GAME_LIB "./bin/libGameLoadable.so"
@@ -13,7 +13,7 @@
 
 #define EXPORT extern "C" __attribute__((visibility("default")))
 
-#define CompleteAllWrites NotImplemented()
+#define CompleteAllWrites Warn("Implement CompleteAllWrites!!");
 
 /*
  * glWasm Business
@@ -45,5 +45,5 @@ typedef int PFNSWAPINTERVALPROC;
 inline void
 WakeThread( semaphore *Semaphore )
 {
-  NotImplemented();
+  Info("Implement WakeThread!");
 }

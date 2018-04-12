@@ -111,18 +111,10 @@ InitChunkPerlin(world_chunk *WorldChunk, v3 WorldChunkDim, u32 ColorIndex)
 }
 
 void
-PushWorkQueueEntry(work_queue *Queue, work_queue_entry *Entry)
-{
-  Queue->Entries[Queue->EnqueueIndex] = *Entry;
+PushWorkQueueEntry(work_queue *Queue, work_queue_entry *Entry);
 
-  CompleteAllWrites;
-
-  Queue->EnqueueIndex = (Queue->EnqueueIndex+1) % WORK_QUEUE_SIZE;
-
-  WakeThread( &Queue->Semaphore );
-
-  return;
-}
+void
+InitializeVoxels(world_chunk *Chunk);
 
 inline void
 QueueChunkForInit(work_queue *Queue, world_chunk *Chunk)
@@ -137,7 +129,13 @@ QueueChunkForInit(work_queue *Queue, world_chunk *Chunk)
 
   SetFlag(Chunk, Chunk_Queued);
 
+
+  // TODO(Jesse): Put the work queue back in
+#if 0
   PushWorkQueueEntry(Queue, &Entry);
+#else
+  InitializeVoxels(Chunk);
+#endif
 
   return;
 }
@@ -543,6 +541,7 @@ AllocateAndInitWorld( game_state *GameState, world_position Center,
   World->ChunkHash = PUSH_STRUCT_CHECKED(world_chunk*, Plat->Memory, WORLD_HASH_SIZE );
   World->FreeChunks = PUSH_STRUCT_CHECKED(world_chunk*, Plat->Memory, FREELIST_SIZE );
 
+  Print(World->FreeChunkCount);
   Assert(World->FreeChunkCount == 0);
 
   /*

@@ -37,9 +37,14 @@ debug_global os *Global_Os = 0;
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if WASM
+#include <game.cpp>
+#else
+game_thread_callback_proc GameThreadCallback;
+#endif
+
 
 global_variable s64 LastGameLibTime;
-global_variable game_thread_callback_proc GameThreadCallback;
 
 b32
 GameLibIsNew(const char *LibPath)
@@ -97,13 +102,9 @@ void
 PushWorkQueueEntry(work_queue *Queue, work_queue_entry *Entry)
 {
   Queue->Entries[Queue->EnqueueIndex] = *Entry;
-
   CompleteAllWrites;
-
   Queue->EnqueueIndex = (Queue->EnqueueIndex+1) % WORK_QUEUE_SIZE;
-
   WakeThread( &Queue->Semaphore );
-
   return;
 }
 
@@ -161,6 +162,10 @@ InitializeOpenGlExtensions(gl_extensions *Gl, os *Os)
   const char* glExtensionString = (const char*)glGetString(GL_EXTENSIONS);
   Debug(glExtensionString);
   Debug(glxExtensionString);
+
+#elif 1
+  const GLubyte* ShadingVersion =  glGetString(GL_SHADING_LANGUAGE_VERSION);
+  Info("Shading Version : %s", ShadingVersion);
 #endif
 
   /*
@@ -168,6 +173,11 @@ InitializeOpenGlExtensions(gl_extensions *Gl, os *Os)
    */
   DefGlProc(PFNGLCOMPRESSEDTEXIMAGE2DPROC, glCompressedTexImage2D);
   DefGlProc(PFNGLACTIVETEXTUREPROC, glActiveTexture);
+
+  /*
+   * 1.1
+   */
+  DefGlProc(PFNGLGENTEXTURESPROC, glGenTextures);
 
   /*
    * 1.5
@@ -350,20 +360,6 @@ SearchForProjectRoot(void)
 }
 
 void
-QueryAndSetGlslVersion(platform *Plat)
-{
-  r64 GLSL_Version = atof((char*)glGetString ( GL_SHADING_LANGUAGE_VERSION ));
-  Info("GLSL verison : %f", GLSL_Version );
-
-  if (GLSL_Version >= 3.3)
-    Plat->GlslVersion = "330";
-  else
-    Plat->GlslVersion = "310ES";
-
-  return;
-}
-
-void
 ClearWasPressedFlags(input_event *Input)
 {
   u32 TotalEvents = sizeof(input)/sizeof(input_event);
@@ -423,6 +419,95 @@ FrameEnd(void)
   }
 }
 
+
+struct platform_loop_input
+{
+  os *Os;
+  platform *Plat;
+  game_state *GameState;
+  hotkeys *Hotkeys;
+  r64 *LastMs;
+  u64 *LastCycles;
+  shared_lib GameLib;
+};
+
+void
+PlatformLoop(void *Input)
+{
+  Info("Entered Platform Loop");
+  platform_loop_input *CastInput = (platform_loop_input*)Input;
+
+  os *Os                = CastInput->Os;
+  platform *Plat        = CastInput->Plat;
+  game_state *GameState = CastInput->GameState;
+  hotkeys *Hotkeys      = CastInput->Hotkeys;
+  r64 *LastMs           = CastInput->LastMs;
+  u64 *LastCycles       = CastInput->LastCycles;
+  shared_lib GameLib    = CastInput->GameLib;
+
+
+  r64 CurrentMS = GetHighPrecisionClock();
+  Plat->dt = (CurrentMS - *LastMs)/1000.0f;
+  *LastMs = CurrentMS;
+
+#if BONSAI_INTERNAL
+  u64 CurrentCycles = GetDebugState()->GetCycleCount();
+  u64 FrameCycles = CurrentCycles - *LastCycles;
+  *LastCycles = CurrentCycles;
+#endif
+
+  if (Plat->dt > 1.0f)
+  {
+    Warn("DT exceeded 1s, truncating.");
+    Plat->dt = 1.0f;
+  }
+
+  ClearWasPressedFlags((input_event*)&Plat->Input);
+  DEBUG_FRAME_BEGIN(Hotkeys, Plat->dt, FrameCycles);
+
+  TIMED_BLOCK("Frame Preamble");
+  v2 LastMouseP = Plat->MouseP;
+  while ( ProcessOsMessages(Os, Plat) );
+  Plat->MouseDP = LastMouseP - Plat->MouseP;
+
+  BindHotkeysToInput(Hotkeys, &Plat->Input);
+
+#if !EMCC
+  game_main_proc GameUpdateAndRender = 0;
+  if ( GameLibIsNew(GAME_LIB) )
+  {
+    CloseLibrary(GameLib);
+    GameLib = OpenLibrary(GAME_LIB);
+
+    GameUpdateAndRender = (game_main_proc)GetProcFromLib(GameLib, "GameUpdateAndRender");
+    if (!GameUpdateAndRender) { Error("Retreiving GameUpdateAndRender from Game Lib :( "); return; }
+
+    game_init_globals_proc InitGlobals = (game_init_globals_proc)GetProcFromLib(GameLib, "InitGlobals");
+    GameThreadCallback = (game_thread_callback_proc)GetProcFromLib(GameLib, "GameThreadCallback");
+
+    InitGlobals(Plat);
+  }
+#endif
+
+
+  /* DEBUG_FRAME_RECORD(Debug_RecordingState, Hotkeys); */
+
+  END_BLOCK("Frame Preamble");
+
+  GameUpdateAndRender(Plat, GameState, Hotkeys);
+
+  TIMED_BLOCK("Frame End");
+  DEBUG_FRAME_END(Plat, FrameCycles);
+
+  BonsaiSwapBuffers(Os);
+
+  /* WaitForFrameTime(LastMs, 30.0f); */
+
+  FrameEnd();
+
+  END_BLOCK("Frame End");
+}
+
 s32
 main(s32 NumArgs, char ** Args)
 {
@@ -452,24 +537,24 @@ main(s32 NumArgs, char ** Args)
 
   GameLibIsNew(GAME_LIB);  // Hack to initialize the LastGameLibTime static
 
+
+#if !WASM
   shared_lib GameLib = OpenLibrary(GAME_LIB);
   if (!GameLib) { Error("Loading GameLib :( "); return False; }
 
   game_init_proc GameInit = (game_init_proc)GetProcFromLib(GameLib, "GameInit");
   if (!GameInit) { Error("Retreiving GameInit from Game Lib :( "); return False; }
 
-  game_main_proc GameUpdateAndRender = (game_main_proc)GetProcFromLib(GameLib, "GameUpdateAndRender");
-  if (!GameUpdateAndRender) { Error("Retreiving GameUpdateAndRender from Game Lib :( "); return False; }
-
   game_init_globals_proc InitGlobals = (game_init_globals_proc)GetProcFromLib(GameLib, "InitGlobals");
   if (!InitGlobals) { Error("Retreiving InitGlobals from Game Lib :( "); return False; }
 
   GameThreadCallback = (game_thread_callback_proc)GetProcFromLib(GameLib, "GameThreadCallback");
   if (!GameThreadCallback) { Error("Retreiving GameThreadCallback from Game Lib :( "); return False; }
+#endif
+
 
   b32 WindowSuccess = OpenAndInitializeWindow(&Os, &Plat);
   if (!WindowSuccess) { Error("Initializing Window :( "); return False; }
-
   Assert(Os.Window);
 
   InitializeOpenGlExtensions(&Plat.GL, &Os);
@@ -477,16 +562,14 @@ main(s32 NumArgs, char ** Args)
 
   INIT_DEUBG_STATE(&Plat, DebugMemory);
 
-  InitGlobals(&Plat);
-
-  QueryAndSetGlslVersion(&Plat);
+  InitGlobals(&Plat, &Os);
 
   hotkeys Hotkeys = {};
 
   Plat.Graphics = GraphicsInit(GraphicsMemory);
   if (!Plat.Graphics) { Error("Initializing Graphics"); return False; }
 
-  game_state *GameState = GameInit(&Plat, GameMemory, &Os);
+  game_state *GameState = (game_state*)GameInit(&Plat, GameMemory, &Os);
   if (!GameState) { Error("Initializing Game State :( "); return False; }
 
   /*
@@ -499,66 +582,20 @@ main(s32 NumArgs, char ** Args)
   u64 LastCycles = GetDebugState()->GetCycleCount();
 #endif
 
-  while ( Os.ContinueRunning )
-  {
-    r64 CurrentMS = GetHighPrecisionClock();
-    Plat.dt = (CurrentMS - LastMs)/1000.0f;
-    LastMs = CurrentMS;
+  Info("Main Loop Started");
 
-#if BONSAI_INTERNAL
-    u64 CurrentCycles = GetDebugState()->GetCycleCount();
-    u64 FrameCycles = CurrentCycles - LastCycles;
-    LastCycles = CurrentCycles;
-#endif
+  platform_loop_input Input = {};
 
-    if (Plat.dt > 1.0f)
-    {
-      Warn("DT exceeded 1s, truncating.");
-      Plat.dt = 1.0f;
-    }
+  Input.Os         = &Os;
+  Input.Plat       = &Plat;
+  Input.GameState  = GameState;
+  Input.Hotkeys    = &Hotkeys;
+  Input.LastMs     = &LastMs;
+  Input.LastCycles = &LastCycles;
+  Input.GameLib    = GameLib;
 
-    ClearWasPressedFlags((input_event*)&Plat.Input);
-    DEBUG_FRAME_BEGIN(&Hotkeys, Plat.dt, FrameCycles);
-
-    TIMED_BLOCK("Frame Preamble");
-    v2 LastMouseP = Plat.MouseP;
-    while ( ProcessOsMessages(&Os, &Plat) );
-    Plat.MouseDP = LastMouseP - Plat.MouseP;
-
-    BindHotkeysToInput(&Hotkeys, &Plat.Input);
-
-#if !WASM
-    if ( GameLibIsNew(GAME_LIB) )
-    {
-      CloseLibrary(GameLib);
-      GameLib = OpenLibrary(GAME_LIB);
-
-      GameUpdateAndRender = (game_main_proc)GetProcFromLib(GameLib, "GameUpdateAndRender");
-      InitGlobals = (game_init_globals_proc)GetProcFromLib(GameLib, "InitGlobals");
-      GameThreadCallback = (game_thread_callback_proc)GetProcFromLib(GameLib, "GameThreadCallback");
-
-      InitGlobals(&Plat);
-    }
-#endif
-
-
-    /* DEBUG_FRAME_RECORD(Debug_RecordingState, &Hotkeys); */
-
-    END_BLOCK("Frame Preamble");
-
-    GameUpdateAndRender(&Plat, GameState, &Hotkeys);
-
-    TIMED_BLOCK("Frame End");
-    DEBUG_FRAME_END(&Plat, FrameCycles);
-
-    BonsaiSwapBuffers(&Os);
-
-    /* WaitForFrameTime(LastMs, 30.0f); */
-
-    FrameEnd();
-
-    END_BLOCK("Frame End");
-  }
+  emscripten_set_canvas_element_size(0, SCR_WIDTH, SCR_HEIGHT);
+  emscripten_set_main_loop_arg(PlatformLoop, &Input, 0, True);
 
   Info("Shutting Down");
   Terminate(&Os);

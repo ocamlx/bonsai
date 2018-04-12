@@ -17,8 +17,8 @@ BufferVertsDirect(
   TIMED_FUNCTION();
   if ( Dest->CurrentIndex + NumVerts > Dest->Allocated )
   {
-    Assert(false);
     Error("Ran out of memory pushing %d Verts onto Mesh with %d/%d used", NumVerts, Dest->CurrentIndex, Dest->Allocated);
+    Assert(false);
     return;
   }
 
@@ -44,8 +44,8 @@ BufferVertsDirect(
   TIMED_FUNCTION();
   if ( Dest->CurrentIndex + NumVerts > Dest->Allocated )
   {
-    Assert(false);
     Error("Ran out of memory pushing %d Verts onto Mesh with %d/%d used", NumVerts, Dest->CurrentIndex, Dest->Allocated);
+    Assert(false);
     return;
   }
 
@@ -72,8 +72,8 @@ BufferVertsDirect(
   TIMED_FUNCTION();
   if ( Dest->CurrentIndex + NumVerts > Dest->Allocated )
   {
-    Assert(false);
     Error("Ran out of memory pushing %d Verts onto Mesh with %d/%d used", NumVerts, Dest->CurrentIndex, Dest->Allocated);
+    Assert(false);
     return;
   }
 
