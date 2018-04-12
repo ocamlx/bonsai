@@ -251,6 +251,16 @@ BufferNormalsToCard(umm BufferId, untextured_3d_geometry_buffer *Mesh, u32 Attri
 }
 
 
+void
+GenBuffers(u32 NumBuffers, u32 *BufferName)
+{
+  Print(NumBuffers);
+  glGenBuffers(NumBuffers, BufferName);
+  Print(*BufferName);
+  Assert(*BufferName);
+  return;
+}
+
 
 #define BUFFER_UVS_TO_CARD(BufferId, Mesh, AttributeIndex)                                           \
   Assert(Mesh->Verts);                                                                               \

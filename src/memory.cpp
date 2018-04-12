@@ -12,7 +12,7 @@ u8*
 PushSize(memory_arena *Arena, umm SizeIn)
 {
 
-#if 1
+#if 0
   u8* Result = (u8*)malloc(SizeIn);
   memset(Result, 0, SizeIn);
   return Result;

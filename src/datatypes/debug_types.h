@@ -167,7 +167,7 @@ struct debug_timed_function
   {
     debug_state *DebugState = GetDebugState();
     if (!DebugState->DebugDoScopeProfiling) return;
-    if (!DebugState->WriteScope) { Warn("No Debug Write scope"); return; }
+    if (!DebugState->WriteScope) { return; }
 
     ++DebugState->NumScopes;
 

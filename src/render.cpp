@@ -29,9 +29,9 @@ Init_Global_QuadVertexBuffer() {
   GenBuffers(1, &Global_QuadVertexBuffer);
   Assert(Global_QuadVertexBuffer);
 
-  GL_Global->glBindBuffer(GL_ARRAY_BUFFER, Global_QuadVertexBuffer);
-  GL_Global->glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
-  GL_Global->glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, Global_QuadVertexBuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   return;
 }
@@ -45,9 +45,9 @@ RenderQuad()
     Init_Global_QuadVertexBuffer();
   }
 
-  GL_Global->glEnableVertexAttribArray(0);
-  GL_Global->glBindBuffer(GL_ARRAY_BUFFER, Global_QuadVertexBuffer);
-  GL_Global->glVertexAttribPointer(
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, Global_QuadVertexBuffer);
+  glVertexAttribPointer(
     0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
     3,                  // size
     GL_FLOAT,           // type
@@ -58,8 +58,8 @@ RenderQuad()
 
   Draw(6); // 2*3 indices starting at 0 -> 2 triangles
 
-  GL_Global->glBindBuffer(GL_ARRAY_BUFFER, 0);
-  GL_Global->glDisableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(0);
 }
 
 
@@ -88,16 +88,16 @@ GenTexture(v2i Dim, memory_arena *Mem)
   // FIXME(Jesse): Can someone explain to me why I cannot pass a pointer to a
   // heap allocated u32 to GenTextures?! ie. The ID from the texture pointer
   // allocated above ?!
-  // GL_Global->glGenTextures(1, &Texture->ID);
+  // glGenTextures(1, &Texture->ID);
 
   // This also does not work.
   /* u32 *Tex = PUSH_STRUCT_CHECKED(u32, Mem, 1); */
-  /* GL_Global->glGenTextures(1, &Tex); */
+  /* glGenTextures(1, &Tex); */
   /* Texture->ID = Tex; */
   /* Assert(Texture->ID); */
 
   u32 Tex = {};
-  GL_Global->glGenTextures(1, &Tex);
+  glGenTextures(1, &Tex);
   Texture->ID = Tex;
   Assert(Texture->ID);
 
@@ -230,7 +230,7 @@ AllocateAndInitSsaoNoise(ao_render_group *AoGroup, memory_arena *GraphicsMemory)
 s32
 GetShaderUniform(shader *Shader, const char *Name)
 {
-  s32 Result = GL_Global->glGetUniformLocation(Shader->ID, Name);
+  s32 Result = glGetUniformLocation(Shader->ID, Name);
   if (Result == INVALID_SHADER_UNIFORM)
   {
     Warn("Couldn't retreive %s shader uniform - was it optimized out?", Name);
@@ -357,7 +357,7 @@ framebuffer
 GenFramebuffer()
 {
   framebuffer Framebuffer = {};
-  GL_Global->glGenFramebuffers(1, &Framebuffer.ID);
+  glGenFramebuffers(1, &Framebuffer.ID);
 
   return Framebuffer;
 }
@@ -400,7 +400,7 @@ CreateGbuffer(memory_arena *Memory)
 void
 FramebufferDepthTexture(g_buffer_render_group *Group, texture *Tex)
 {
-  GL_Global->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
       GL_TEXTURE_2D, Tex->ID, 0);
   return;
 }
@@ -409,7 +409,7 @@ void
 FramebufferTexture(framebuffer *FBO, texture *Tex)
 {
   u32 Attachment = FBO->Attachments++;
-  GL_Global->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + Attachment,
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + Attachment,
       GL_TEXTURE_2D, Tex->ID, 0);
 
   return;
@@ -428,17 +428,17 @@ SetDrawBuffers(framebuffer *FBO)
     Attachments[AttIndex] =  GL_COLOR_ATTACHMENT0 + AttIndex;
   }
 
-  GL_Global->glDrawBuffers(FBO->Attachments, Attachments);
+  glDrawBuffers(FBO->Attachments, Attachments);
 
 }
 
 b32
 CheckAndClearFramebuffer()
 {
-  b32 Result = (GL_Global->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+  b32 Result = (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   return Result;
 }
@@ -507,7 +507,7 @@ bool
 InitAoRenderGroup(ao_render_group *AoGroup, memory_arena *GraphicsMemory,
                   g_buffer_textures *Textures, m4 *ViewProjection)
 {
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, AoGroup->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, AoGroup->FBO.ID);
 
   v2i ScreenDim = V2i(SCR_WIDTH, SCR_HEIGHT);
   AssertNoGlErrors;
@@ -528,7 +528,7 @@ InitAoRenderGroup(ao_render_group *AoGroup, memory_arena *GraphicsMemory,
 bool
 InitGbufferRenderGroup( g_buffer_render_group *gBuffer, memory_arena *GraphicsMemory)
 {
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->FBO.ID);
 
   gBuffer->Textures = PUSH_STRUCT_CHECKED(g_buffer_textures, GraphicsMemory, 1);
 
@@ -564,14 +564,14 @@ InitializeShadowBuffer(shadow_render_group *SG, memory_arena *GraphicsMemory)
 {
   AssertNoGlErrors;
   // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-  GL_Global->glGenFramebuffers(1, &SG->FramebufferName);
+  glGenFramebuffers(1, &SG->FramebufferName);
   AssertNoGlErrors;
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, SG->FramebufferName);
+  glBindFramebuffer(GL_FRAMEBUFFER, SG->FramebufferName);
   AssertNoGlErrors;
 
   SG->ShadowMap = MakeDepthTexture( V2i(SHADOW_MAP_RESOLUTION_X, SHADOW_MAP_RESOLUTION_Y), GraphicsMemory);
   AssertNoGlErrors;
-  GL_Global->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, SG->ShadowMap->ID, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, SG->ShadowMap->ID, 0);
   AssertNoGlErrors;
 
   // TODO(Jesse): Not present on ES2 .. should we use them?
@@ -588,11 +588,11 @@ InitializeShadowBuffer(shadow_render_group *SG, memory_arena *GraphicsMemory)
   AssertNoGlErrors;
   SG->MVP_ID = GetShaderUniform(&SG->DepthShader, "depthMVP");
 
-  if(GL_Global->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     return false;
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   SG->GameLights.Lights = PUSH_STRUCT_CHECKED(light, GraphicsMemory, MAX_LIGHTS);
   PushLight(&SG->GameLights, V3(0.0f, 0.0f, 17.0f), LightType_Point);
@@ -618,6 +618,7 @@ graphics *
 GraphicsInit(memory_arena *GraphicsMemory)
 {
   graphics *Result = PUSH_STRUCT_CHECKED(graphics, GraphicsMemory, 1);
+  Result->Viewport = V2(SCR_WIDTH, SCR_HEIGHT);
 
   Result->Camera = PUSH_STRUCT_CHECKED(camera, GraphicsMemory, 1);
   InitCamera(Result->Camera, CameraInitialFront, 1000.0f);
@@ -719,8 +720,8 @@ BindShaderUniforms(shader *Shader)
       {
         Assert(TextureUnit < 8); // TODO(Jesse): Query max gpu textures?
 
-        GL_Global->glActiveTexture(GL_TEXTURE0 + TextureUnit);
-        GL_Global->glUniform1i(Uniform->ID, TextureUnit);
+        glActiveTexture(GL_TEXTURE0 + TextureUnit);
+        glUniform1i(Uniform->ID, TextureUnit);
         glBindTexture(GL_TEXTURE_2D, Uniform->Texture->ID);
 
         TextureUnit++;
@@ -728,38 +729,38 @@ BindShaderUniforms(shader *Shader)
 
       case ShaderUniform_U32:
       {
-        GL_Global->glUniform1ui(Uniform->ID, *Uniform->U32);
+        glUniform1ui(Uniform->ID, *Uniform->U32);
       } break;
 
       case ShaderUniform_R32:
       {
-        GL_Global->glUniform1f(Uniform->ID, *Uniform->R32);
+        glUniform1f(Uniform->ID, *Uniform->R32);
       } break;
 
       case ShaderUniform_S32:
       {
-        GL_Global->glUniform1i(Uniform->ID, *Uniform->S32);
+        glUniform1i(Uniform->ID, *Uniform->S32);
       } break;
 
       case ShaderUniform_M4:
       {
-        GL_Global->glUniformMatrix4fv(Uniform->ID, 1, GL_FALSE, (r32*)Uniform->M4);
+        glUniformMatrix4fv(Uniform->ID, 1, GL_FALSE, (r32*)Uniform->M4);
       } break;
 
       case ShaderUniform_V3:
       {
-        GL_Global->glUniform3fv(Uniform->ID, 1, (r32*)Uniform->V3);
+        glUniform3fv(Uniform->ID, 1, (r32*)Uniform->V3);
       } break;
 
       case ShaderUniform_Light:
       {
-        GL_Global->glUniform3fv(Uniform->ID, 1, &Uniform->Light->Position.E[0]);
+        glUniform3fv(Uniform->ID, 1, &Uniform->Light->Position.E[0]);
       } break;
 
       case ShaderUniform_Camera:
       {
         v3 ViewPosition = GetRenderP(Uniform->Camera->P, Uniform->Camera);
-        GL_Global->glUniform3fv(Uniform->ID, 1, &ViewPosition.E[0]);
+        glUniform3fv(Uniform->ID, 1, &ViewPosition.E[0]);
       }break;;
 
       InvalidDefaultCase;
@@ -782,7 +783,7 @@ DrawTexturedQuad(shader *SimpleTextureShader)
   texture *Texture = SimpleTextureShader->FirstUniform->Texture;
   SetViewport( V2(Texture->Dim.x, Texture->Dim.y)*Scale );
 
-  GL_Global->glUseProgram(SimpleTextureShader->ID);
+  glUseProgram(SimpleTextureShader->ID);
 
   BindShaderUniforms(SimpleTextureShader);
 
@@ -795,12 +796,12 @@ DrawTexturedQuad(shader *SimpleTextureShader)
 void
 RenderAoTexture(ao_render_group *AoGroup)
 {
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, AoGroup->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, AoGroup->FBO.ID);
   SetViewport( V2(SCR_WIDTH, SCR_HEIGHT) );
 
-  GL_Global->glUseProgram(AoGroup->Shader.ID);
+  glUseProgram(AoGroup->Shader.ID);
 
-  GL_Global->glUniform3fv(AoGroup->SsaoKernelUniform, SSAO_KERNEL_SIZE, (r32*)AoGroup->SsaoKernel);
+  glUniform3fv(AoGroup->SsaoKernelUniform, SSAO_KERNEL_SIZE, (r32*)AoGroup->SsaoKernel);
 
   BindShaderUniforms(&AoGroup->Shader);
 
@@ -812,12 +813,12 @@ RenderAoTexture(ao_render_group *AoGroup)
 }
 
 void
-DrawGBufferToFullscreenQuad( platform *Plat, graphics *Graphics, world_position WorldChunkDim)
+DrawGBufferToFullscreenQuad( graphics *Graphics, world_position WorldChunkDim )
 {
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  SetViewport(V2(Plat->WindowWidth, Plat->WindowHeight));
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  SetViewport(Graphics->Viewport);
 
-  GL_Global->glUseProgram(Graphics->gBuffer->LightingShader.ID);
+  glUseProgram(Graphics->gBuffer->LightingShader.ID);
 
   Graphics->gBuffer->ShadowMVP = NdcToScreenSpace * GetShadowMapMVP(Graphics->Camera, &Graphics->SG->GameLights.Lights[0]);
 
@@ -854,16 +855,16 @@ RenderShadowMap(untextured_3d_geometry_buffer *Mesh, graphics *Graphics)
 
   m4 MVP = GetShadowMapMVP(Camera, &SG->GameLights[0]);
 
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, SG->FramebufferName);
+  glBindFramebuffer(GL_FRAMEBUFFER, SG->FramebufferName);
 
-  GL_Global->glUseProgram(SG->DepthShader.ID);
-  GL_Global->glUniformMatrix4fv(SG->MVP_ID, 1, GL_FALSE, &MVP.E[0].E[0]);
+  glUseProgram(SG->DepthShader.ID);
+  glUniformMatrix4fv(SG->MVP_ID, 1, GL_FALSE, &MVP.E[0].E[0]);
 
   // 1rst attribute buffer : vertices
-  GL_Global->glEnableVertexAttribArray(0);
-  GL_Global->glBindBuffer(GL_ARRAY_BUFFER, RG->vertexbuffer);
-  GL_Global->glBufferData(GL_ARRAY_BUFFER, Mesh->CurrentIndex*sizeof(v3), Mesh->VertexData, GL_STATIC_DRAW);
-  GL_Global->glVertexAttribPointer(
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, RG->vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, Mesh->CurrentIndex*sizeof(v3), Mesh->VertexData, GL_STATIC_DRAW);
+  glVertexAttribPointer(
     0,                  // The attribute we want to configure
     3,                  // size
     GL_FLOAT,           // type
@@ -874,8 +875,8 @@ RenderShadowMap(untextured_3d_geometry_buffer *Mesh, graphics *Graphics)
 
   Draw(Mesh->CurrentIndex);
 
-  GL_Global->glDisableVertexAttribArray(0);
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glDisableVertexAttribArray(0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   return;
 #endif
@@ -886,8 +887,8 @@ RenderWorldToGBuffer(untextured_3d_geometry_buffer *Mesh, g_buffer_render_group 
 {
   TIMED_FUNCTION();
   AssertNoGlErrors;
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, RG->FBO.ID);
-  GL_Global->glUseProgram(RG->gBufferShader.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, RG->FBO.ID);
+  glUseProgram(RG->gBufferShader.ID);
   AssertNoGlErrors;
 
   SetViewport( V2(SCR_WIDTH, SCR_HEIGHT) );
@@ -912,9 +913,9 @@ RenderWorldToGBuffer(untextured_3d_geometry_buffer *Mesh, g_buffer_render_group 
 
 
   AssertNoGlErrors;
-  GL_Global->glDisableVertexAttribArray(0);
-  GL_Global->glDisableVertexAttribArray(1);
-  GL_Global->glDisableVertexAttribArray(2);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
 
   AssertNoGlErrors;
   return;
@@ -939,8 +940,8 @@ RenderGBuffer(untextured_3d_geometry_buffer *Mesh, graphics *Graphics)
 inline void
 RenderPostBuffer(post_processing_group *PostGroup, untextured_3d_geometry_buffer *Mesh)
 {
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, PostGroup->FBO.ID);
-  GL_Global->glUseProgram(PostGroup->Shader.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, PostGroup->FBO.ID);
+  glUseProgram(PostGroup->Shader.ID);
 
   SetViewport( V2(SCR_WIDTH, SCR_HEIGHT) );
 
@@ -954,8 +955,8 @@ RenderPostBuffer(post_processing_group *PostGroup, untextured_3d_geometry_buffer
   Draw(Mesh->CurrentIndex);
   Mesh->CurrentIndex = 0;
 
-  GL_Global->glDisableVertexAttribArray(0);
-  GL_Global->glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 }
 
 inline void
@@ -1430,19 +1431,19 @@ ClearFramebuffers(graphics *Graphics)
 
 #if BONSAI_INTERNAL
   debug_text_render_group *TextRG = &GetDebugState()->TextRenderGroup;
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, TextRG->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, TextRG->FBO.ID);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
 
   // FIXME(Jesse): This is taking _forever_ on Linux (GLES) .. does it take
   // forever on other Linux systems?
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, Graphics->gBuffer->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, Graphics->gBuffer->FBO.ID);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, Graphics->SG->FramebufferName);
+  glBindFramebuffer(GL_FRAMEBUFFER, Graphics->SG->FramebufferName);
   glClear(GL_DEPTH_BUFFER_BIT);
 
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   return;
@@ -2586,7 +2587,7 @@ BufferWorld(world *World, graphics *Graphics, camera *Camera)
 #if BONSAI_INTERNAL
         if (GetDebugState()->Debug_RedrawEveryPush)
         {
-          DrawGBufferToFullscreenQuad( Global_Plat, Graphics, WORLD_CHUNK_DIM);
+          DrawGBufferToFullscreenQuad( Graphics, WORLD_CHUNK_DIM);
           /* glXSwapBuffers(Global_Os->Display, Global_Os->Window); */
           RuntimeBreak();
           ClearFramebuffers(Graphics);

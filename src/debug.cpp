@@ -52,21 +52,11 @@ CheckAndClearFramebuffer();
 void
 BindShaderUniforms(shader *Shader);
 
-void
-GenBuffers(u32 NumBuffers, u32 *BufferName)
-{
-  Print(NumBuffers);
-  GL_Global->glGenBuffers(NumBuffers, BufferName);
-  Print(*BufferName);
-  Assert(*BufferName);
-  return;
-}
-
 b32
 InitDebugOverlayFramebuffer(debug_text_render_group *RG, memory_arena *DebugArena, const char *DebugFont)
 {
-  GL_Global->glGenFramebuffers(1, &RG->FBO.ID);
-  GL_Global->glBindFramebuffer(GL_FRAMEBUFFER, RG->FBO.ID);
+  glGenFramebuffers(1, &RG->FBO.ID);
+  glBindFramebuffer(GL_FRAMEBUFFER, RG->FBO.ID);
 
   v2i ScreenDim = V2i(SCR_WIDTH, SCR_HEIGHT);
 

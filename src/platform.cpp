@@ -25,9 +25,6 @@
 // TODO(Jesse): Axe this!!
 static gl_extensions *GL_Global = 0;
 
-debug_global platform *Global_Plat = 0;
-debug_global os *Global_Os = 0;
-
 #include <texture.cpp>
 #include <shader.cpp>
 #include <bonsai_vertex.h>
@@ -265,8 +262,8 @@ PlatformInit(platform *Plat, memory_arena *Memory)
   Plat->GetCycleCount = GetCycleCount;
 
   // Initialized from globals
-  Plat->WindowHeight = SCR_HEIGHT;
   Plat->WindowWidth = SCR_WIDTH;
+  Plat->WindowHeight = SCR_HEIGHT;
 
   Plat->Memory = Memory;
 
@@ -431,7 +428,7 @@ struct platform_loop_input
   shared_lib GameLib;
 };
 
-void
+b32
 PlatformLoop(void *Input)
 {
   Info("Entered Platform Loop");
@@ -444,7 +441,6 @@ PlatformLoop(void *Input)
   r64 *LastMs           = CastInput->LastMs;
   u64 *LastCycles       = CastInput->LastCycles;
   shared_lib GameLib    = CastInput->GameLib;
-
 
   r64 CurrentMS = GetHighPrecisionClock();
   Plat->dt = (CurrentMS - *LastMs)/1000.0f;
@@ -465,9 +461,9 @@ PlatformLoop(void *Input)
   ClearWasPressedFlags((input_event*)&Plat->Input);
   DEBUG_FRAME_BEGIN(Hotkeys, Plat->dt, FrameCycles);
 
-  TIMED_BLOCK("Frame Preamble");
   v2 LastMouseP = Plat->MouseP;
   while ( ProcessOsMessages(Os, Plat) );
+  Plat->Graphics->Viewport = V2(Plat->WindowWidth, Plat->WindowHeight);
   Plat->MouseDP = LastMouseP - Plat->MouseP;
 
   BindHotkeysToInput(Hotkeys, &Plat->Input);
@@ -480,19 +476,17 @@ PlatformLoop(void *Input)
     GameLib = OpenLibrary(GAME_LIB);
 
     GameUpdateAndRender = (game_main_proc)GetProcFromLib(GameLib, "GameUpdateAndRender");
-    if (!GameUpdateAndRender) { Error("Retreiving GameUpdateAndRender from Game Lib :( "); return; }
+    if (!GameUpdateAndRender) { Error("Retreiving GameUpdateAndRender from Game Lib :( "); return False; }
 
     game_init_globals_proc InitGlobals = (game_init_globals_proc)GetProcFromLib(GameLib, "InitGlobals");
     GameThreadCallback = (game_thread_callback_proc)GetProcFromLib(GameLib, "GameThreadCallback");
 
-    InitGlobals(Plat);
+    InitGlobals(Plat, Os);
   }
 #endif
 
 
   /* DEBUG_FRAME_RECORD(Debug_RecordingState, Hotkeys); */
-
-  END_BLOCK("Frame Preamble");
 
   GameUpdateAndRender(Plat, GameState, Hotkeys);
 
@@ -506,6 +500,8 @@ PlatformLoop(void *Input)
   FrameEnd();
 
   END_BLOCK("Frame End");
+
+  return Os->ContinueRunning;
 }
 
 s32
@@ -531,9 +527,6 @@ main(s32 NumArgs, char ** Args)
 
   os Os = {};
   Os.ContinueRunning = True;
-
-  Global_Plat = &Plat;
-  Global_Os = &Os;
 
   GameLibIsNew(GAME_LIB);  // Hack to initialize the LastGameLibTime static
 
@@ -594,8 +587,12 @@ main(s32 NumArgs, char ** Args)
   Input.LastCycles = &LastCycles;
   Input.GameLib    = GameLib;
 
+#if WASM
   emscripten_set_canvas_element_size(0, SCR_WIDTH, SCR_HEIGHT);
   emscripten_set_main_loop_arg(PlatformLoop, &Input, 0, True);
+#else
+  while (PlatformLoop(&Input));
+#endif
 
   Info("Shutting Down");
   Terminate(&Os);

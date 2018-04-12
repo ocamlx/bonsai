@@ -45,7 +45,7 @@ s32
 CompileShader(const char *Header, const char *Code, u32 Type)
 {
   AssertNoGlErrors;
-  u32 ShaderID = GL_Global->glCreateShader(Type);
+  u32 ShaderID = glCreateShader(Type);
   AssertNoGlErrors;
 
   const char *Sources[2] = {Header, Code};
@@ -54,18 +54,18 @@ CompileShader(const char *Header, const char *Code, u32 Type)
   /* Debug("%s", Code); */
 
   // Compile
-  GL_Global->glShaderSource(ShaderID, 2, Sources, NULL);
+  glShaderSource(ShaderID, 2, Sources, NULL);
   AssertNoGlErrors;
-  GL_Global->glCompileShader(ShaderID);
+  glCompileShader(ShaderID);
   AssertNoGlErrors;
 
   // Check Status
   s32 Result = GL_FALSE;
   s32 InfoLogLength = 0;
 
-  GL_Global->glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &Result);
+  glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &Result);
   AssertNoGlErrors;
-  GL_Global->glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, (s32*)&InfoLogLength);
+  glGetShaderiv(ShaderID, GL_INFO_LOG_LENGTH, (s32*)&InfoLogLength);
   AssertNoGlErrors;
 
   // FIXME(Jesse): EMCC/webgl?? is misbehaving and setting this to 1 when there
@@ -76,7 +76,7 @@ CompileShader(const char *Header, const char *Code, u32 Type)
   if ( InfoLogLength > 0 )
   {
     char *VertexShaderErrorMessage = (char*)malloc(InfoLogLength+1);
-    GL_Global->glGetShaderInfoLog(ShaderID, InfoLogLength, NULL, VertexShaderErrorMessage);
+    glGetShaderInfoLog(ShaderID, InfoLogLength, NULL, VertexShaderErrorMessage);
     Error("Shader : %s", VertexShaderErrorMessage);
     ShaderID = INVALID_SHADER_UNIFORM;
   }
@@ -113,22 +113,22 @@ LoadShaders(const char * VertShaderPath, const char * FragFilePath, memory_arena
   AssertNoGlErrors;
 
   // Link the program
-  u32 ProgramID = GL_Global->glCreateProgram();
+  u32 ProgramID = glCreateProgram();
   Assert(ProgramID);
 
   AssertNoGlErrors;
 
-  GL_Global->glAttachShader(ProgramID, VertexShaderID);
+  glAttachShader(ProgramID, VertexShaderID);
   AssertNoGlErrors;
-  GL_Global->glAttachShader(ProgramID, FragmentShaderID);
+  glAttachShader(ProgramID, FragmentShaderID);
   AssertNoGlErrors;
-  GL_Global->glLinkProgram(ProgramID);
+  glLinkProgram(ProgramID);
   AssertNoGlErrors;
 
   // Check the program
-  GL_Global->glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
+  glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
   AssertNoGlErrors;
-  GL_Global->glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+  glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
   AssertNoGlErrors;
 
   // FIXME(Jesse): EMCC/webgl?? is misbehaving and setting this to 1 when there
@@ -139,19 +139,19 @@ LoadShaders(const char * VertShaderPath, const char * FragFilePath, memory_arena
   if ( InfoLogLength > 0 )
   {
     char *ProgramErrorMessage = (char*)malloc(InfoLogLength+1);
-    GL_Global->glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, ProgramErrorMessage);
+    glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, ProgramErrorMessage);
     Error("%s", ProgramErrorMessage);
   }
 
 
-  GL_Global->glDetachShader(ProgramID, VertexShaderID);
+  glDetachShader(ProgramID, VertexShaderID);
   AssertNoGlErrors;
-  GL_Global->glDetachShader(ProgramID, FragmentShaderID);
+  glDetachShader(ProgramID, FragmentShaderID);
   AssertNoGlErrors;
 
-  GL_Global->glDeleteShader(VertexShaderID);
+  glDeleteShader(VertexShaderID);
   AssertNoGlErrors;
-  GL_Global->glDeleteShader(FragmentShaderID);
+  glDeleteShader(FragmentShaderID);
   AssertNoGlErrors;
 
   shader Shader = {};

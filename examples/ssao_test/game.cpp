@@ -79,7 +79,7 @@ DoGameplay(platform *Plat, game_state *GameState, hotkeys *Hotkeys)
 
     RenderGBuffer(&World->Mesh, Graphics);
     RenderAoTexture(AoGroup);
-    DrawGBufferToFullscreenQuad( Plat, Graphics, World->ChunkDim);
+    DrawGBufferToFullscreenQuad( Graphics, World->ChunkDim);
 
   #if DEBUG_DRAW_SHADOW_MAP_TEXTURE
     // DrawTexturedQuad(&GetDebugState()->TextRenderGroup->DebugTextureShader);
@@ -151,14 +151,10 @@ GameThreadCallback(work_queue_entry *Entry)
 EXPORT void
 InitGlobals(platform *Plat, os *Os)
 {
-  GL_Global = &Plat->GL;
   Global_WorldChunkDim = WORLD_CHUNK_DIM;
 #if BONSAI_INTERNAL
   GlobalDebugState = &Plat->DebugState;
 #endif
-
-  Global_Os = Os;
-  Global_Plat = Plat;
 }
 
 EXPORT void*
