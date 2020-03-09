@@ -1,3 +1,15 @@
+bonsai_function b32
+WriteToFile(native_file*, counted_string);
+
+bonsai_function void
+LogToConsole(counted_string Output)
+{
+  if (!WriteToFile(&Stdout, Output))
+  {
+    Error("Writing to Stdout");
+  }
+}
+
 inline void
 PrintSemValue( semaphore *Semaphore )
 {
@@ -668,6 +680,32 @@ PlatformSetThreadPriority(s32 Priority)
   }
 
   return;
+}
+
+inline socket_t
+CreateSocket(socket_type Type)
+{
+  s32 SocketType = SOCK_STREAM | (Type == Socket_Blocking ? 0 : SOCK_NONBLOCK);
+
+  socket_t Socket = {Type};
+  Socket.Id = socket(AF_INET, SocketType, 0);
+
+  if (Socket.Id == -1)
+  {
+    Error("Could not create socket");
+    Socket.Id = 0;
+  }
+  return Socket;
+}
+
+inline sockaddr_in
+CreateAddress(const char* IP)
+{
+  sockaddr_in Address = {};
+  Address.sin_family = AF_INET;
+  Address.sin_port = htons( REMOTE_PORT );
+  Address.sin_addr.s_addr = inet_addr(IP);
+  return Address;
 }
 
 // It seemed to me doing this actually made performance _worse_

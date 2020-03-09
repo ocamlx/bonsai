@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /bin/bash
 
 # COMMON_OPTIMIZATION_OPTIONS="-O2"
 
