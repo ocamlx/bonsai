@@ -2,7 +2,7 @@
 struct debug_state;
 struct game_state;
 typedef debug_state* (*get_debug_state_proc)();
-function get_debug_state_proc GetDebugState;
+bonsai_function get_debug_state_proc GetDebugState;
 
 #define DEFAULT_DEBUG_LIB "./bin/lib_debug_system.so"
 
@@ -378,8 +378,8 @@ GetMemoryArenaStats(memory_arena *ArenaIn)
 #define TIMED_FUNCTION() debug_timed_function FunctionTimer(BONSAI_FUNCTION_NAME)
 #define TIMED_NAMED_BLOCK(BlockName) debug_timed_function BlockTimer(BlockName)
 
-#define TIMED_BLOCK(BlockName) { debug_timed_function BlockTimer(BlockName)
-#define END_BLOCK(BlockName) }
+#define TIMED_BLOCK(BlockName) do { debug_timed_function BlockTimer(BlockName)
+#define END_BLOCK(BlockName) } while (false)
 
 #define DEBUG_VALUE(Pointer) GetDebugState()->DebugValue(Pointer, #Pointer)
 

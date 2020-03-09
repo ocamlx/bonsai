@@ -195,7 +195,7 @@ ReadUntilTerminatorString(ansi_stream *Cursor, counted_string Terminator)
   return Result;
 }
 
-function b32
+bonsai_function b32
 Advance(ansi_stream* Cursor, u32 Lookahead = 0)
 {
   b32 Result = False;
@@ -281,12 +281,12 @@ PopWordCounted(ansi_stream *Cursor, const char *Delimeters = 0)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CountedString(ansi_stream Stream)
 {
   counted_string Result = {
+    .Count = (umm)(Stream.End-Stream.Start),
     .Start = Stream.Start,
-    .Count = (umm)(Stream.End-Stream.Start)
   };
   return Result;
 }

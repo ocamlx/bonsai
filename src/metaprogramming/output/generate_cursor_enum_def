@@ -6,7 +6,7 @@ struct enum_def_cursor
   enum_def* At;
 };
 
-function enum_def_cursor
+bonsai_function enum_def_cursor
 EnumDefCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

@@ -1,16 +1,5 @@
-#define CACHE_LINE_SIZE (64)
-#define function static
 
-#define ITERATE_OVER(type, value_ptr)                \
-  for (type##_iterator Iter = Iterator((value_ptr)); \
-      IsValid(&Iter);                                \
-      Advance(&Iter))
-
-#define GET_ELEMENT(I) (&(I).At->Element)
-
-
-#include <stdint.h>
-#include <cmath>
+#define _CRT_SECURE_NO_WARNINGS
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -31,6 +20,7 @@
 #include <bonsai_stdlib/headers/vector.h>
 #include <random>                                   // TODO(Jesse): Perlin.h depends on this .. rewrite it.
 #include <algorithm>                                // TODO(Jesse): Perlin.h depends on this .. rewrite it.
+#include <numeric>                                  // TODO(Jesse): Perlin.h depends on this .. rewrite it.
 #include <bonsai_stdlib/headers/perlin.h>
 #include <bonsai_stdlib/headers/input.h>
 #include <bonsai_stdlib/headers/work_queue.h>
@@ -81,7 +71,7 @@
 
 
 #include <engine/api.h>
-#include <net/network.h>
+/* #include <net/network.h> */
 
 global_variable memory_arena _TranArena;
 global_variable memory_arena* TranArena = &_TranArena;
@@ -101,6 +91,7 @@ global_variable memory_arena* TranArena = &_TranArena;
 #include <bonsai_stdlib/cpp/bitmap.cpp>
 #include <bonsai_stdlib/cpp/matrix.cpp>
 #include <bonsai_stdlib/cpp/heap_memory.cpp>
+#include <bonsai_stdlib/cpp/memory_arena.cpp>
 #include <bonsai_stdlib/cpp/xml.cpp>
 #include <bonsai_stdlib/cpp/file.cpp>
 #include <bonsai_stdlib/cpp/work_queue.cpp>

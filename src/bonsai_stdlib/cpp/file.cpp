@@ -1,4 +1,4 @@
-function b32
+bonsai_function b32
 CloseFile(native_file* File)
 {
   b32 Result = False;
@@ -16,7 +16,7 @@ CloseFile(native_file* File)
 
 static const char* DefaultPermissions = "rw+b";
 
-function b32
+bonsai_function b32
 Rename(native_file CurrentFile, counted_string NewFilePath)
 {
   const char* Old = GetNullTerminated(CurrentFile.Path);
@@ -25,7 +25,7 @@ Rename(native_file CurrentFile, counted_string NewFilePath)
   return Result;
 }
 
-function native_file
+bonsai_function native_file
 OpenFile(const char* FilePath, const char* Permissions = DefaultPermissions)
 {
   native_file Result = {
@@ -41,7 +41,7 @@ OpenFile(const char* FilePath, const char* Permissions = DefaultPermissions)
   return Result;
 }
 
-function native_file
+bonsai_function native_file
 OpenFile(counted_string FilePath, const char* Permissions = DefaultPermissions)
 {
   const char* NullTerminatedFilePath = GetNullTerminated(FilePath);
@@ -49,7 +49,7 @@ OpenFile(counted_string FilePath, const char* Permissions = DefaultPermissions)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GetRandomFilename(random_series* Entropy, memory_arena* Memory)
 {
   u32 FilenameLength = 32;
@@ -68,7 +68,7 @@ GetRandomFilename(random_series* Entropy, memory_arena* Memory)
 
   return Filename;
 }
-function counted_string
+bonsai_function counted_string
 GetTmpFilename(random_series* Entropy, memory_arena* Memory)
 {
   counted_string Filename = GetRandomFilename(Entropy, Memory);
@@ -76,7 +76,7 @@ GetTmpFilename(random_series* Entropy, memory_arena* Memory)
   return Filename;
 }
 
-function native_file
+bonsai_function native_file
 GetTempFile(random_series* Entropy, memory_arena* Memory)
 {
   counted_string Filename = GetTmpFilename(Entropy, Memory);
@@ -86,7 +86,7 @@ GetTempFile(random_series* Entropy, memory_arena* Memory)
   return Result;
 }
 
-function inline b32
+bonsai_function inline b32
 WriteToFile(native_file* File, counted_string Str)
 {
   b32 Result = False;
@@ -102,14 +102,14 @@ WriteToFile(native_file* File, counted_string Str)
   return Result;
 }
 
-function inline b32
+bonsai_function inline b32
 WriteToFile(native_file* File, ansi_stream Str)
 {
   b32 Result = WriteToFile(File, CountedString(Str));
   return Result;
 }
 
-function b32
+bonsai_function b32
 FileExists(const char* Path)
 {
   b32 Result = False;
@@ -128,20 +128,19 @@ FileExists(const char* Path)
   return Result;
 }
 
-function b32
+void
+ReadBytes(u8* Dest, u64 BytesToRead, FILE *Src)
+{
+  Assert(BytesToRead);
+  u64 BytesRead = fread(Dest, 1, BytesToRead, Src);
+  Assert(BytesRead != 0);
+  return;
+}
+
+bonsai_function b32
 FileExists(counted_string Path)
 {
   const char* NullTerminatedFilePath = GetNullTerminated(Path);
   b32 Result = FileExists(NullTerminatedFilePath);
   return Result;
 }
-
-function void
-LogToConsole(counted_string Output)
-{
-  if (!WriteToFile(&Stdout, Output))
-  {
-    Error("Writing to Stdout");
-  }
-}
-

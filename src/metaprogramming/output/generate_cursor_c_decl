@@ -6,7 +6,7 @@ struct c_decl_cursor
   c_decl* At;
 };
 
-function c_decl_cursor
+bonsai_function c_decl_cursor
 CDeclCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

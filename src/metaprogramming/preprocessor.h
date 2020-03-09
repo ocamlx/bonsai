@@ -332,7 +332,7 @@ GetToken(ansi_stream* Stream, u32 Lookahead = 0)
   return Result;
 }
 
-function c_decl_iterator
+bonsai_function c_decl_iterator
 Iterator(c_decl_stream* Stream)
 {
   c_decl_iterator Iterator = {
@@ -341,14 +341,14 @@ Iterator(c_decl_stream* Stream)
   return Iterator;
 }
 
-function b32
+bonsai_function b32
 IsValid(c_decl_iterator* Iter)
 {
   b32 Result = (Iter->At != 0);
   return Result;
 }
 
-function void
+bonsai_function void
 Advance(c_decl_iterator* Iter)
 {
   Iter->At = Iter->At->Next;

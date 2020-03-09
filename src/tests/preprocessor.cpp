@@ -2,7 +2,7 @@
 #include <metaprogramming/preprocessor.cpp>
 #include <tests/test_utils.cpp>
 
-function void
+bonsai_function void
 TestBasicTokenizationAndParsing(memory_arena* Memory)
 {
   c_parse_result Parser_ = TokenizeFile(CS(TEST_FIXTURES_PATH "/preprocessor_basic.cpp"), Memory);
@@ -258,7 +258,7 @@ TestBasicTokenizationAndParsing(memory_arena* Memory)
   TestThat(Remaining(&Parser->Tokens) == 0);
 }
 
-function void
+bonsai_function void
 TestPeekAndPopTokens(memory_arena* Memory)
 {
   c_parse_result Parser_ = TokenizeFile(CS(TEST_FIXTURES_PATH "/preprocessor_peek_pop.cpp"), Memory);

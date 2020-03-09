@@ -67,21 +67,6 @@ GetLogicalCoreCount()
   return CoreCount;
 }
 
-u32
-GetWorkerThreadCount()
-{
-  u32 LogicalCoreCount = GetLogicalCoreCount();
-  u32 ThreadCount = LogicalCoreCount - 1 - DEBUG_THREAD_COUNT_BIAS; // -1 because we already have a main thread
-  return ThreadCount;
-}
-
-u32
-GetTotalThreadCount()
-{
-  u32 Result = GetWorkerThreadCount() + 1;
-  return Result;
-}
-
 u8*
 PlatformProtectPage(u8* Mem)
 {
@@ -721,34 +706,3 @@ PlatformSetWorkerThreadPriority()
   return;
 }
 #endif
-
-// TODO(Jesse): This actually has nothing to do with the platform
-inline void
-RewindArena(memory_arena *Arena, umm RestartBlockSize = Megabytes(1) )
-{
-  if (Arena->Prev)
-  {
-    PlatformUnprotectArena(Arena->Prev);
-    VaporizeArena(Arena->Prev);
-    Arena->Prev = 0;
-  }
-
-  PlatformUnprotectArena(Arena);
-
-  u8* ClearByte = Arena->Start;
-  while( ClearByte < Arena->At )
-  {
-    *ClearByte++ = 0;
-  }
-
-  Arena->At = Arena->Start;
-  Arena->NextBlockSize = RestartBlockSize;
-
-#if BONSAI_INTERNAL
-  Arena->Pushes = 0;
-  DEBUG_CLEAR_META_RECORDS_FOR(Arena);
-#endif
-
-  return;
-}
-

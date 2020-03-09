@@ -12,7 +12,7 @@ struct d_union_member_stream
 };
 
 
-function void
+bonsai_function void
 Push(d_union_member_stream* Stream, d_union_member Element, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?
@@ -44,7 +44,7 @@ struct d_union_member_iterator
   d_union_member_stream_chunk* At;
 };
 
-function d_union_member_iterator
+bonsai_function d_union_member_iterator
 Iterator(d_union_member_stream* Stream)
 {
   d_union_member_iterator Iterator = {
@@ -54,14 +54,14 @@ Iterator(d_union_member_stream* Stream)
   return Iterator;
 }
 
-function b32
+bonsai_function b32
 IsValid(d_union_member_iterator* Iter)
 {
   b32 Result = Iter->At != 0;
   return Result;
 }
 
-function void
+bonsai_function void
 Advance(d_union_member_iterator* Iter)
 {
   Iter->At = Iter->At->Next;

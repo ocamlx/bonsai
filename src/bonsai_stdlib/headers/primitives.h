@@ -1,3 +1,7 @@
+#include <stdint.h>
+#include <cmath>
+
+
 #define PI64 (3.1415926535897932384626433832795028841971693993)
 #define PI32 (float(PI64))
 
@@ -5,8 +9,8 @@
 #define global_variable static
 #define debug_global static
 
-/* #define True  ((bool)1) */
-/* #define False ((bool)0) */
+#define True  ((bool)1)
+#define False ((bool)0)
 
 #define ArrayCount(a) (sizeof(a)/sizeof(a[0]))
 #define InvalidDefaultCase default: {Error("InvalidDefaultCase"); Assert(False);} break
@@ -102,7 +106,7 @@ counted_string
 CS(const char *S, umm Count)
 {
   counted_string Result = {
-    .Start = S, .Count = Count
+    .Count = Count, .Start = S
   };
   return Result;
 }

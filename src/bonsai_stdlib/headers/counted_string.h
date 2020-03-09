@@ -83,14 +83,14 @@ StringHash(const char* S1)
   return Result;
 }
 
-function b32
+bonsai_function b32
 IsPathSeparator(char C)
 {
   b32 Result = C == '/';
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 StripExtension(counted_string FilePath)
 {
   counted_string Result = FilePath;
@@ -109,7 +109,7 @@ StripExtension(counted_string FilePath)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 Basename(counted_string FilePath)
 {
   umm LastPathSeparator = 0;
@@ -123,8 +123,8 @@ Basename(counted_string FilePath)
     }
   }
   counted_string Result = {
-    .Start = FilePath.Start + LastPathSeparator,
-    .Count = FilePath.Count - LastPathSeparator
+    .Count = FilePath.Count - LastPathSeparator,
+    .Start = FilePath.Start + LastPathSeparator
   };
 
   return Result;
@@ -212,7 +212,7 @@ Contains(const char *S1, const char *S2)
   return False;
 }
 
-function counted_string
+bonsai_function counted_string
 Trim(counted_string String)
 {
   counted_string Result = String;
@@ -265,7 +265,7 @@ Split(counted_string* String, char SplitTarget)
   return Result;
 }
 
-function char
+bonsai_function char
 Advance(char_cursor* BufferCursor)
 {
   char Result = 0;
@@ -280,7 +280,7 @@ Advance(char_cursor* BufferCursor)
   return Result;
 }
 
-function char
+bonsai_function char
 ToUpper(char C)
 {
   u32 MapToUpper = 'a' - 'A';
@@ -291,14 +291,14 @@ ToUpper(char C)
   return C;
 }
 
-function b32
+bonsai_function b32
 IsNumeric(char C)
 {
   b32 Result = (C >= '0' && C <= '9');
   return Result;
 }
 
-function u32
+bonsai_function u32
 ToU32(char C)
 {
   Assert(IsNumeric(C));
@@ -306,7 +306,7 @@ ToU32(char C)
   return Result;
 }
 
-function u32
+bonsai_function u32
 Exp(u32 Base, u32 Exponent)
 {
   u32 Result = 1;
@@ -320,7 +320,7 @@ Exp(u32 Base, u32 Exponent)
   return Result;
 }
 
-function u32
+bonsai_function u32
 ToU32(counted_string S)
 {
   u32 Result = 0;
@@ -335,14 +335,14 @@ ToU32(counted_string S)
   return Result;
 }
 
-function char
+bonsai_function char
 Peek(char_cursor* BufferCursor)
 {
   char Result = *BufferCursor->At;
   return Result;
 }
 
-function u32
+bonsai_function u32
 EmbeddedU32(char_cursor* FormatCursor)
 {
   char* NumStart = FormatCursor->At;
@@ -355,7 +355,7 @@ EmbeddedU32(char_cursor* FormatCursor)
   return Result;
 }
 
-function void
+bonsai_function void
 CopyToDest(char_cursor* Dest, char C)
 {
   b32 DoCopy = True;
@@ -388,7 +388,7 @@ CopyToDest(char_cursor* Dest, char C)
   }
 }
 
-function void
+bonsai_function void
 u64ToChar(char_cursor* Dest, u64 Value, u32 Base = 10, char *Digits = DecChars)
 {
   Assert(Base != 0);
@@ -416,7 +416,7 @@ u64ToChar(char_cursor* Dest, u64 Value, u32 Base = 10, char *Digits = DecChars)
   return;
 }
 
-function void
+bonsai_function void
 s64ToChar(char_cursor* Dest, s64 Value, u32 Base = 10, char *Digits = DecChars)
 {
   if (Value < 0)
@@ -431,7 +431,7 @@ s64ToChar(char_cursor* Dest, s64 Value, u32 Base = 10, char *Digits = DecChars)
 
 // Note(Jesse): Shamelessly copied, then modified, from the Handmade Hero codebase
 #define DEFAULT_FORMAT_PRECISION (16)
-function void
+bonsai_function void
 f64ToChar(char_cursor* Dest, r64 Value, u32 Precision = DEFAULT_FORMAT_PRECISION)
 {
   if(Value < 0)

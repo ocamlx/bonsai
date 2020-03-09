@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/bash
 
 # COMMON_OPTIMIZATION_OPTIONS="-O2"
 
@@ -42,7 +42,7 @@ OUTPUT_DIRECTORY="$BIN"
 # TODO(Jesse): Investigate -Wcast-align situation
 
 COMMON_COMPILER_OPTIONS="
-  -ferror-limit=2000
+  -ferror-limit=20000
   -ggdb
   -Weverything
   -Wno-c++98-compat-pedantic
@@ -64,10 +64,20 @@ COMMON_COMPILER_OPTIONS="
   -Wno-covered-switch-default
   -Wno-c99-extensions
   -Wno-reserved-id-macro
+
+  -Wno-nonportable-system-include-path
+  -Wno-implicit-int-float-conversion
+  -Wno-unused-variable
+  -Wno-unused-parameter
+  -Wno-reorder-init-list
+  -Wno-atomic-implicit-seq-cst
 "
 
-COMMON_LINKER_OPTIONS="-lpthread -lX11 -ldl -lGL"
-SHARED_LIBRARY_FLAGS="-shared -fPIC"
+
+COMMON_LINKER_OPTIONS="-lgdi32 -lopengl32 -luser32  "
+# COMMON_LINKER_OPTIONS="-lpthread -lX11 -ldl -lGL"
+
+SHARED_LIBRARY_FLAGS="-shared"
 
 EXAMPLES_TO_BUILD="
   $EXAMPLES/world_gen
@@ -104,92 +114,14 @@ TESTS_TO_BUILD="
   $TESTS/file.cpp
 "
 
-function BuildPreprocessor {
-
-  which clang++ > /dev/null
-  [ $? -ne 0 ] && echo -e "Please install clang++" && exit 1
-
-  echo -e ""
-  echo -e "$Delimeter"
-  echo -e ""
-
-  ColorizeTitle "Building Preprocessor"
-  executable="$SRC/metaprogramming/preprocessor.cpp"
-  SetOutputBinaryPathBasename "$executable" "$BIN"
-  echo -e "$Building $executable"
-  clang++                \
-    $COMMON_OPTIMIZATION_OPTIONS \
-    $COMMON_COMPILER_OPTIONS     \
-    $COMMON_LINKER_OPTIONS       \
-    -D BONSAI_INTERNAL=1         \
-    -I"$SRC"                     \
-    -o "$output_basename"        \
-    $executable
-
-  if [ $? -eq 0 ]; then
-   echo -e "$Success $executable"
-  else
-   echo ""
-   echo -e "$Failed Error building preprocessor, exiting."
-   exit 1
-  fi
-
-  echo -e ""
-  echo -e "$Delimeter"
-  echo -e ""
-}
-
 function BuildWithClang {
+
   which clang++ > /dev/null
   [ $? -ne 0 ] && echo -e "Please install clang++" && exit 1
 
   echo -e ""
   echo -e "$Delimeter"
   echo -e ""
-
-  ColorizeTitle "Executables"
-  for executable in $EXECUTABLES_TO_BUILD; do
-    SetOutputBinaryPathBasename "$executable" "$BIN"
-    echo -e "$Building $executable"
-    clang++                        \
-      $COMMON_OPTIMIZATION_OPTIONS \
-      $COMMON_COMPILER_OPTIONS     \
-      $COMMON_LINKER_OPTIONS       \
-      -D BONSAI_INTERNAL=1         \
-      -I"$SRC"                     \
-      -o "$output_basename"        \
-      $executable && echo -e "$Success $executable" &
-  done
-
-  echo ""
-  ColorizeTitle "Debug Tests"
-  for executable in $DEBUG_TESTS_TO_BUILD; do
-    SetOutputBinaryPathBasename "$executable" "$BIN_TEST"
-    echo -e "$Building $executable"
-    clang++                      \
-      $COMMON_COMPILER_OPTIONS   \
-      $COMMON_LINKER_OPTIONS     \
-      -D BONSAI_INTERNAL=1       \
-      -I"$SRC"                   \
-      -o "$output_basename"      \
-      $executable && echo -e "$Success $executable" &
-  done
-
-  echo ""
-  ColorizeTitle "Tests"
-  for executable in $TESTS_TO_BUILD; do
-    SetOutputBinaryPathBasename "$executable" "$BIN_TEST"
-    echo -e "$Building $executable"
-    clang++                        \
-      $COMMON_OPTIMIZATION_OPTIONS \
-      $COMMON_COMPILER_OPTIONS     \
-      $COMMON_LINKER_OPTIONS       \
-      -D BONSAI_INTERNAL=1         \
-      -I"$SRC"                     \
-      -I"$SRC/debug_system"        \
-      -o "$output_basename"        \
-      $executable && echo -e "$Success $executable" &
-  done
 
   echo ""
   ColorizeTitle "DebugSystem"
@@ -205,30 +137,6 @@ function BuildWithClang {
     -I"$SRC/debug_system"          \
     -o "$BIN/lib_debug_system.so"  \
     "$DEBUG_SRC_FILE" && echo -e "$Success $DEBUG_SRC_FILE" &
-
-  echo ""
-  ColorizeTitle "Examples"
-  for executable in $EXAMPLES_TO_BUILD; do
-    echo -e "$Building $executable"
-    SetOutputBinaryPathBasename "$executable" "$BIN"
-    clang++                                                     \
-      $SHARED_LIBRARY_FLAGS                                     \
-      $COMMON_OPTIMIZATION_OPTIONS                              \
-      $COMMON_COMPILER_OPTIONS                                  \
-      $COMMON_LINKER_OPTIONS                                    \
-      -D BONSAI_INTERNAL=1                                      \
-      -I"$SRC"                                                  \
-      -I"$executable"                                           \
-      -o "$output_basename"                                     \
-      "$executable/game.cpp" &&                                 \
-      mv "$output_basename" "$output_basename""_loadable.so" && \
-      echo -e "$Success $executable" &
-  done
-
-  echo -e ""
-  echo -e "$Delimeter"
-  echo -e ""
-  ColorizeTitle "Complete"
 
   wait
 
@@ -269,50 +177,11 @@ fi
 
 function RunEntireBuild {
 
-  rm -Rf $META_OUT
-  mkdir $META_OUT
-
-  # git checkout "src/metaprogramming/output"
-
-  SOURCE_FILES="$(find src -type f -name "*.h" -and -not -wholename "src/metaprogramming/defines.h" | tr '\n' ' ') $(find src -type f -name "*.cpp" | tr '\n' ' ')"
-  ColorizeTitle "Preprocessing"
-  bin/preprocessor $SOURCE_FILES
-  if [ $? -ne 0 ]; then
-    echo ""
-    echo -e "$Failed Preprocessing failed, exiting." 
-    git checkout "src/metaprogramming/output"
-    exit 1
-  fi
-
-  BuildPreprocessor
-  [ ! -x bin/preprocessor ] && echo -e "$Failed Couldn't find preprocessor, exiting." && exit 1
-
-  SOURCE_FILES="$(find src -type f -name "*.h" -and -not -wholename "src/metaprogramming/defines.h" | tr '\n' ' ') $(find src -type f -name "*.cpp" | tr '\n' ' ')"
-  ColorizeTitle "Preprocessing"
-  bin/preprocessor $SOURCE_FILES
-  if [ $? -ne 0 ]; then
-    echo ""
-    echo -e "$Failed Preprocessing failed, exiting." 
-    git checkout "src/metaprogramming/output"
-    exit 1
-  fi
-
   if [ "$EMCC" == "1" ]; then
     BuildWithEmcc
   else
     BuildWithClang
   fi
-
-  ./scripts/run_tests.sh
-
-  # ColorizeTitle "Preprocessing"
-  # bin/preprocessor $SOURCE_FILES
-  # if [ $? -ne 0 ]; then
-  #   echo ""
-  #   echo -e "$Failed Preprocessing failed, exiting." 
-  #   git checkout "src/metaprogramming/output"
-  #   exit 1
-  # fi
 
 }
 

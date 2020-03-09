@@ -292,7 +292,7 @@ SafeTruncateToU16(umm Size)
 
 // @temp-string-builder-memory
 // TODO(Jesse): Make allocating these on the stack work!
-function memory_arena*
+bonsai_function memory_arena*
 AllocateArena(umm RequestedBytes = Megabytes(1), b32 MemProtect = True)
 {
   // FIXME(Jesse): We shouldn't really be able to ask for < 1MB worth of space
@@ -339,7 +339,7 @@ AllocateArena(umm RequestedBytes = Megabytes(1), b32 MemProtect = True)
   return Result;
 }
 
-function void
+bonsai_function void
 ReallocateArena(memory_arena *Arena, umm MinSize, b32 MemProtect)
 {
   u64 AllocationSize = Arena->NextBlockSize;
@@ -360,7 +360,7 @@ ReallocateArena(memory_arena *Arena, umm MinSize, b32 MemProtect)
   return;
 }
 
-function u8*
+bonsai_function u8*
 Reallocate(u8* Allocation, memory_arena* Arena, umm CurrentSize, umm RequestedSize)
 {
   u8* Result = 0;
@@ -392,7 +392,7 @@ Reallocate(u8* Allocation, memory_arena* Arena, umm CurrentSize, umm RequestedSi
   return Result;
 }
 
-function void
+bonsai_function void
 Memprotect(void* LastPage, umm PageSize, s32 Protection)
 {
   s32 ProtectSuccess = (mprotect(LastPage, PageSize, Protection) == 0);
@@ -422,7 +422,7 @@ Memprotect(void* LastPage, umm PageSize, s32 Protection)
   return;
 }
 
-function u8*
+bonsai_function u8*
 PushSize(memory_arena *Arena, umm SizeIn, umm Alignment, b32 MemProtect)
 {
   umm ToAlignment = Alignment - (SizeIn % Alignment);
@@ -519,7 +519,7 @@ PushSize(memory_arena *Arena, umm SizeIn, umm Alignment, b32 MemProtect)
   return Result;
 }
 
-function void*
+bonsai_function void*
 PushStruct(memory_arena *Memory, umm sizeofStruct, umm Alignment = 1, b32 MemProtect = True)
 {
   void* Result = PushSize(Memory, sizeofStruct, Alignment, MemProtect);

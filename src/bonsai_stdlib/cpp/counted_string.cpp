@@ -3,8 +3,8 @@ CountedString(umm Count, memory_arena* Memory)
 {
   TIMED_FUNCTION();
   counted_string Result = {
+    .Count = Count,
     .Start = AllocateProtection(const char, Memory, Count, False),
-    .Count = Count
   };
   return Result;
 }
@@ -26,8 +26,8 @@ CountedString(const char* Start, umm Count, memory_arena* Memory)
 {
   TIMED_FUNCTION();
   counted_string Result = {
+    .Count = Count,
     .Start = AllocateProtection(const char, Memory, Count, False),
-    .Count = Count
   };
 
   MemCopy((u8*)Start, (u8*)Result.Start, Count);
@@ -35,7 +35,7 @@ CountedString(const char* Start, umm Count, memory_arena* Memory)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 Concat(counted_string S1, counted_string S2, memory_arena* Memory)
 {
   umm TotalLength = S1.Count + S2.Count;
@@ -50,7 +50,7 @@ Concat(counted_string S1, counted_string S2, memory_arena* Memory)
   return Result;
 }
 
-function const char*
+bonsai_function const char*
 GetNullTerminated(counted_string Str, memory_arena* Memory = TranArena)
 {
   const char* Result = AllocateProtection(const char, Memory, Str.Count+1, False);
@@ -58,7 +58,7 @@ GetNullTerminated(counted_string Str, memory_arena* Memory = TranArena)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 ToCapitalCase(counted_string Source, memory_arena* Memory)
 {
   u32 ResultLength = 0;
@@ -110,7 +110,7 @@ ToCapitalCase(counted_string Source, memory_arena* Memory)
   FormatCountedString_(Memory, Fmt, __VA_ARGS__)          \
   _Pragma("clang diagnostic pop")
 
-function counted_string
+bonsai_function counted_string
 FormatCountedString_(memory_arena* Memory, counted_string FS, ...)
 {
   TIMED_FUNCTION();
@@ -310,7 +310,7 @@ FormatCountedString_(memory_arena* Memory, counted_string FS, ...)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 MemorySize(u64 Number)
 {
   r64 KB = (r64)Kilobytes(1);
@@ -341,56 +341,56 @@ MemorySize(u64 Number)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(s64 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%ld"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(u64 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%lu"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(s32 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%d"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(u32 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%u"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(r64 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%.2f"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(r32 Number)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%.2f"), Number);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 CS(v2 V)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("(%.2f,%.2f)"), V.x, V.y);
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 FormatThousands(u64 Number)
 {
   u64 OneThousand = 1000;
@@ -407,7 +407,7 @@ FormatThousands(u64 Number)
   return Result;
 }
 
-function r32
+bonsai_function r32
 StringToFloat(counted_string* String)
 {
   const char* Temp = GetNullTerminated(*String, TranArena);
@@ -415,7 +415,7 @@ StringToFloat(counted_string* String)
   return Result;
 }
 
-function s32
+bonsai_function s32
 StringToInt(counted_string String)
 {
   const char* Temp = GetNullTerminated(String, TranArena);
@@ -423,14 +423,14 @@ StringToInt(counted_string String)
   return Result;
 }
 
-function s32
+bonsai_function s32
 StringToInt(counted_string* String)
 {
   s32 Result = StringToInt(*String);
   return Result;
 }
 
-function u32
+bonsai_function u32
 StringToUInt(counted_string *String)
 {
   u32 Result = (u32)StringToInt(String);

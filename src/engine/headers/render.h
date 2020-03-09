@@ -11,7 +11,12 @@ enum shader_uniform_type
   ShaderUniform_Camera,
 };
 
-struct texture;
+struct texture
+{
+  u32 ID;
+  v2i Dim;
+};
+
 struct light;
 struct camera;
 
@@ -42,12 +47,6 @@ struct shader
 {
   u32 ID;
   shader_uniform *FirstUniform;
-};
-
-struct texture
-{
-  u32 ID;
-  v2i Dim;
 };
 
 debug_global float

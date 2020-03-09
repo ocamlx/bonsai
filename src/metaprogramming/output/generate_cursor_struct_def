@@ -6,7 +6,7 @@ struct struct_def_cursor
   struct_def* At;
 };
 
-function struct_def_cursor
+bonsai_function struct_def_cursor
 StructDefCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

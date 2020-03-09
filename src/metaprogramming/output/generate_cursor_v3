@@ -6,7 +6,7 @@ struct v3_cursor
   v3* At;
 };
 
-function v3_cursor
+bonsai_function v3_cursor
 V3Cursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

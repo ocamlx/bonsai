@@ -2,14 +2,42 @@
 
 #define BONSAI_MAIN(void) int CALLBACK WinMain( HINSTANCE AppHandle, HINSTANCE Ignored, LPSTR CmdLine, int CmdShow )
 
-static HPALETTE hPalette;
+
+global_variable HPALETTE global_hPalette;
 
 inline b32
-AtomicCompareExchange( volatile unsigned int *Source, unsigned int Exchange, unsigned int Comparator )
+AtomicCompareExchange(volatile u64* Source, u64 Exchange, u64 Comparator)
 {
-  u32 Val = InterlockedCompareExchange( (LONG volatile *)Source, Exchange, Comparator);
-
+  u64 Val = InterlockedCompareExchange( Source, Exchange, Comparator);
   b32 Result = (Val == Comparator);
+  return Result;
+}
+
+inline b32
+AtomicCompareExchange(volatile char** Source, char* Exchange, char* Comparator)
+{
+  b32 Result = AtomicCompareExchange((umm*)Source, (umm)Exchange, (umm)Comparator);
+  return Result;
+}
+
+inline b32
+AtomicCompareExchange(volatile void** Source, void* Exchange, void* Comparator)
+{
+  b32 Result = AtomicCompareExchange((umm*)Source, (umm)Exchange, (umm)Comparator);
+  return Result;
+}
+
+inline u64
+AtomicIncrement( volatile u64 *Source )
+{
+  u64 Result = __sync_fetch_and_add( Source, 1 );
+  return Result;
+}
+
+inline u32
+AtomicIncrement( volatile u32 *Source )
+{
+  u32 Result = __sync_fetch_and_add( Source, 1 );
   return Result;
 }
 
@@ -34,12 +62,12 @@ CreateSemaphore(void)
   return Result;
 }
 
-int
+bonsai_function u64
 GetLogicalCoreCount()
 {
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
-  int Result = sysinfo.dwNumberOfProcessors;
+  u64 Result = sysinfo.dwNumberOfProcessors;
   return Result;
 }
 
@@ -61,13 +89,6 @@ CreateThread( LPTHREAD_START_ROUTINE ThreadMain, thread_startup_params *Params)
 }
 
 #define CompleteAllWrites _WriteBarrier(); _mm_sfence()
-
-u64
-GetCycleCount()
-{
-  u64 Result = __rdtsc();
-  return Result;
-}
 
 inline r64
 GetHighPrecisionClock()
@@ -92,7 +113,7 @@ ComputeDtForFrame(r64 *LastTime)
 }
 
 void
-Terminate(os *Os)
+Terminate(os* Os)
 {
   if (Os->GlContext) // Cleanup Opengl context
   {
@@ -100,9 +121,9 @@ Terminate(os *Os)
     wglDeleteContext(Os->GlContext);
   }
 
-  if (hPalette)
+  if (global_hPalette)
   {
-    DeleteObject(hPalette);
+    DeleteObject(global_hPalette);
   }
 
   ReleaseDC(Os->Window, Os->Display);
@@ -167,9 +188,9 @@ setupPalette(HDC hDC)
     }
 
     pPal = (LOGPALETTE*)
-        malloc(sizeof(LOGPALETTE) + paletteSize * sizeof(PALETTEENTRY));
+        malloc(sizeof(LOGPALETTE) + (u64)paletteSize * sizeof(PALETTEENTRY));
     pPal->palVersion = 0x300;
-    pPal->palNumEntries = paletteSize;
+    pPal->palNumEntries = SafeTruncateU16(paletteSize);
 
     /* build a simple RGB color palette */
     {
@@ -180,11 +201,11 @@ setupPalette(HDC hDC)
 
         for (i=0; i<paletteSize; ++i) {
             pPal->palPalEntry[i].peRed =
-                    (((i >> pfd.cRedShift) & redMask) * 255) / redMask;
+                    SafeTruncateU8((((i >> pfd.cRedShift) & redMask) * 255) / redMask);
             pPal->palPalEntry[i].peGreen =
-                    (((i >> pfd.cGreenShift) & greenMask) * 255) / greenMask;
+                    SafeTruncateU8((((i >> pfd.cGreenShift) & greenMask) * 255) / greenMask);
             pPal->palPalEntry[i].peBlue =
-                    (((i >> pfd.cBlueShift) & blueMask) * 255) / blueMask;
+                    SafeTruncateU8((((i >> pfd.cBlueShift) & blueMask) * 255) / blueMask);
             pPal->palPalEntry[i].peFlags = 0;
         }
     }
@@ -209,6 +230,9 @@ WindowMessageCallback(
     LPARAM lParam)
 {
 
+	os *Os = (os*)GetWindowLongPtr(hWnd, 0);
+	platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
+
   switch (message)
   {
     case WM_CREATE:
@@ -218,15 +242,12 @@ WindowMessageCallback(
 
     case WM_DESTROY:
     {
-      os *Os = (os*)GetWindowLongPtr(hWnd, 0);
       Os->ContinueRunning = false;
 
     } return 0;
 
     case WM_SIZE:
     {
-      platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
-
       int WinWidth = LOWORD(lParam);
       int WinHeight = HIWORD(lParam);
 
@@ -236,13 +257,11 @@ WindowMessageCallback(
 
     case WM_PALETTECHANGED:
     {
-      os *Os = (os*)GetWindowLongPtr(hWnd, 0);
-
       /* realize palette if this is *not* the current window */
-      if (Os->GlContext && hPalette && (HWND) wParam != hWnd)
+      if (Os->GlContext && global_hPalette && (HWND) wParam != hWnd)
       {
-        UnrealizeObject(hPalette);
-        SelectPalette(Os->Display, hPalette, FALSE);
+        UnrealizeObject(global_hPalette);
+        SelectPalette(Os->Display, global_hPalette, FALSE);
         RealizePalette(Os->Display);
         SwapBuffers(Os->Display);
       }
@@ -251,13 +270,11 @@ WindowMessageCallback(
 
     case WM_QUERYNEWPALETTE:
     {
-      os *Os = (os*)GetWindowLongPtr(hWnd, 0);
-
       /* realize palette if this is the current window */
-      if (Os->GlContext && hPalette)
+      if (Os->GlContext && global_hPalette)
       {
-        UnrealizeObject(hPalette);
-        SelectPalette(Os->Display, hPalette, FALSE);
+        UnrealizeObject(global_hPalette);
+        SelectPalette(Os->Display, global_hPalette, FALSE);
         RealizePalette(Os->Display);
         SwapBuffers(Os->Display);
         return TRUE;
@@ -267,8 +284,6 @@ WindowMessageCallback(
 
     case WM_PAINT:
     {
-      os *Os = (os*)GetWindowLongPtr(hWnd, 0);
-
       PAINTSTRUCT ps;
       BeginPaint(hWnd, &ps);
       if (Os->GlContext)
@@ -285,25 +300,29 @@ WindowMessageCallback(
      */
     case WM_LBUTTONDOWN:
     {
-      platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
-      Plat->Input.LMB = True;
+      Plat->Input.LMB.Clicked = True;
+      Plat->Input.LMB.Pressed = True;
     } return 0;
 
     case WM_LBUTTONUP:
     {
-      platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
-      Plat->Input.LMB = False;
+      Plat->Input.LMB.Pressed = False;
     } return 0;
 
     case WM_RBUTTONDOWN:
     {
-      platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
-      Plat->Input.RMB = True;
+      Plat->Input.RMB.Clicked = True;
+      Plat->Input.RMB.Pressed = True;
     } return 0;
+
+    case WM_RBUTTONUP:
+    {
+      Plat->Input.RMB.Pressed = False;
+    } return 0;
+
 
     case WM_MOUSEMOVE:
     {
-      platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET);
       Plat->MouseP.x = (r32)GET_X_LPARAM(lParam);
       Plat->MouseP.y = (r32)GET_Y_LPARAM(lParam);
 
@@ -312,16 +331,18 @@ WindowMessageCallback(
 
 
 
-#define BindToInput(Keysym, InputField, Boolean) \
-  case Keysym: { \
-    platform *Plat = (platform*)GetWindowLongPtr(hWnd, PLATFORM_OFFSET); \
-    Plat->Input.##InputField = Boolean; } return 0;
+#define BindKeyupToInput(Keysym, InputField)     \
+  case Keysym: {                                 \
+				 Plat->Input.InputField.Pressed = False; \
+				 return 0;                               \
+			 } break
 
-#define BindKeyupToInput(Keysym, InputField) \
-    BindToInput(Keysym, InputField, False)
-
-#define BindKeydownToInput(Keysym, InputField) \
-    BindToInput(Keysym, InputField, True)
+#define BindKeydownToInput(Keysym, InputField)  \
+  case Keysym: {                                \
+				 Plat->Input.InputField.Pressed = True; \
+				 Plat->Input.InputField.Clicked = True; \
+				 return 0;                              \
+	 		 } break
 
 
 
@@ -355,7 +376,7 @@ WindowMessageCallback(
         BindKeyupToInput(VK_SPACE, Space);
         default: { /* Ignore all other keypresses */ } break;
       }
-    }
+    } return 0;
 
 
 
@@ -367,7 +388,7 @@ WindowMessageCallback(
         {
           DestroyWindow(hWnd);
           return 0;
-        } return 0;
+        }
 
         BindKeydownToInput(0x57, W);
         BindKeydownToInput(0x44, D);
@@ -394,10 +415,10 @@ WindowMessageCallback(
         BindKeydownToInput(VK_CONTROL, Ctrl);
         BindKeydownToInput(VK_SPACE, Space);
         default: { /* Ignore all other keypresses */ } break;
-      }
+      } return 0;
 
       default: { /* Ignore all other window messages */ } break;
-    }
+    } return 0;
   }
 
    return DefWindowProc(hWnd, message, wParam, lParam);
@@ -434,19 +455,19 @@ OpenAndInitializeWindow( os *Os, platform *Plat)
 
   Os->Display = GetDC(Os->Window);
   setupPixelFormat(Os->Display);
-  hPalette = setupPalette(Os->Display);
+  global_hPalette = setupPalette(Os->Display);
   Os->GlContext = wglCreateContext(Os->Display);
   wglMakeCurrent(Os->Display, Os->GlContext);
 
   {
     SetWindowLongPtr(Os->Window, 0, (LONG_PTR)Os);
-    int e = GetLastError();
+    u64 e = GetLastError();
     Assert(!e);
   }
 
   {
     SetWindowLongPtr(Os->Window, sizeof(Os), (LONG_PTR)Plat);
-    int e = GetLastError();
+    u64 e = GetLastError();
     Assert(!e);
   }
 
@@ -485,7 +506,7 @@ OpenLibrary(const char *LibPath)
 inline b32
 CloseLibrary(shared_lib Lib)
 {
-  b32 Result = FreeLibrary(Lib);
+  b32 Result = (FreeLibrary(Lib) != 0);
   return Result;
 }
 

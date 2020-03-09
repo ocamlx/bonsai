@@ -4,7 +4,7 @@
 #include <metaprogramming/preprocessor.h>
 
 
-function b32
+bonsai_function b32
 IsWhitespace(c_token_type Type)
 {
   b32 Result = Type == CTokenType_Newline       ||
@@ -13,7 +13,7 @@ IsWhitespace(c_token_type Type)
   return Result;
 }
 
-function void
+bonsai_function void
 Advance(c_token_cursor* Tokens, u32 Lookahead = 0)
 {
   if (Remaining(Tokens, Lookahead))
@@ -28,7 +28,7 @@ Advance(c_token_cursor* Tokens, u32 Lookahead = 0)
   return;
 }
 
-function void
+bonsai_function void
 Advance(c_parse_result* Parser, u32 Lookahead = 0)
 {
   if (Remaining(&Parser->Tokens, Lookahead))
@@ -53,7 +53,7 @@ Advance(c_parse_result* Parser, u32 Lookahead = 0)
   return;
 }
 
-function c_token*
+bonsai_function c_token*
 PeekTokenRawPointer(c_parse_result* Parser, u32 Lookahead = 0)
 {
   c_token* Result = {};
@@ -69,7 +69,7 @@ PeekTokenRawPointer(c_parse_result* Parser, u32 Lookahead = 0)
   return Result;
 }
 
-function c_token
+bonsai_function c_token
 PeekTokenRaw(c_parse_result* Parser, u32 Lookahead = 0)
 {
   c_token* Pointer = PeekTokenRawPointer(Parser, Lookahead);
@@ -78,7 +78,7 @@ PeekTokenRaw(c_parse_result* Parser, u32 Lookahead = 0)
   return Result;
 }
 
-function c_token*
+bonsai_function c_token*
 PeekTokenPointer(c_parse_result* Parser, u32 Lookahead = 0)
 {
   c_token* Result = {};
@@ -105,7 +105,7 @@ PeekTokenPointer(c_parse_result* Parser, u32 Lookahead = 0)
   return Result;
 }
 
-function c_token
+bonsai_function c_token
 PeekToken(c_parse_result* Parser, u32 Lookahead = 0)
 {
   c_token* Pointer = PeekTokenPointer(Parser, Lookahead);
@@ -114,7 +114,7 @@ PeekToken(c_parse_result* Parser, u32 Lookahead = 0)
   return Result;
 }
 
-function c_token
+bonsai_function c_token
 PopTokenRaw(c_parse_result* Parser)
 {
   c_token Result = PeekTokenRaw(Parser);
@@ -138,7 +138,7 @@ PopTokenRaw(c_parse_result* Parser)
   return Result;
 }
 
-function c_token
+bonsai_function c_token
 PopToken(c_parse_result* Parser)
 {
   c_token Result = PopTokenRaw(Parser);
@@ -158,7 +158,7 @@ PopToken(c_parse_result* Parser)
   return Result;
 }
 
-function b32
+bonsai_function b32
 OptionalToken(c_parse_result* Parser, c_token T)
 {
   b32 Result = (PeekToken(Parser) == T);
@@ -166,7 +166,7 @@ OptionalToken(c_parse_result* Parser, c_token T)
   return Result;
 }
 
-function b32
+bonsai_function b32
 OptionalToken(c_parse_result* Parser, c_token_type Type)
 {
   b32 Result = (PeekToken(Parser).Type == Type);
@@ -174,7 +174,7 @@ OptionalToken(c_parse_result* Parser, c_token_type Type)
   return Result;
 }
 
-function b32
+bonsai_function b32
 IsMetaprogrammingDirective(counted_string Identifier)
 {
   b32 Result = False;
@@ -191,7 +191,7 @@ IsMetaprogrammingDirective(counted_string Identifier)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 PopIdentifier(ansi_stream* SourceFileStream)
 {
   counted_string Result = {
@@ -215,7 +215,7 @@ PopIdentifier(ansi_stream* SourceFileStream)
   return Result;
 }
 
-function c_parse_result
+bonsai_function c_parse_result
 TokenizeAnsiStream(ansi_stream Code, memory_arena* Memory)
 {
   c_parse_result Result = {
@@ -325,14 +325,14 @@ TokenizeAnsiStream(ansi_stream Code, memory_arena* Memory)
   return Result;
 }
 
-function c_parse_result
+bonsai_function c_parse_result
 TokenizeString(counted_string Code, counted_string Filename, memory_arena* Memory)
 {
   c_parse_result Result = TokenizeAnsiStream(AnsiStream(Code, Filename), Memory);
   return Result;
 }
 
-function c_parse_result
+bonsai_function c_parse_result
 TokenizeFile(counted_string Filename, memory_arena* Memory)
 {
   ansi_stream SourceFileStream = AnsiStreamFromFile(Filename, Memory);
@@ -340,7 +340,7 @@ TokenizeFile(counted_string Filename, memory_arena* Memory)
   return Result;
 }
 
-function void
+bonsai_function void
 TruncateAtNextLineEnd(c_parse_result* Parser, u32 Count)
 {
   while (Remaining(&Parser->Tokens))
@@ -357,7 +357,7 @@ TruncateAtNextLineEnd(c_parse_result* Parser, u32 Count)
   Parser->Tokens.End = Parser->Tokens.At;
 }
 
-function void
+bonsai_function void
 RewindUntil(c_parse_result* Parser, c_token_type Type)
 {
   while (Parser->Tokens.At > Parser->Tokens.Start)
@@ -371,7 +371,7 @@ RewindUntil(c_parse_result* Parser, c_token_type Type)
   }
 }
 
-function void
+bonsai_function void
 TruncateAtPreviousLineStart(c_parse_result* Parser, u32 Count )
 {
   while (Parser->Tokens.At > Parser->Tokens.Start)
@@ -391,7 +391,7 @@ TruncateAtPreviousLineStart(c_parse_result* Parser, u32 Count )
   Parser->Tokens.Start = Parser->Tokens.At;
 }
 
-function void
+bonsai_function void
 Dump(c_parse_result* Parser, u32 LinesToDump = u32_MAX)
 {
   c_parse_result LocalParser = *Parser;
@@ -410,7 +410,7 @@ Dump(c_parse_result* Parser, u32 LinesToDump = u32_MAX)
   }
 }
 
-function void
+bonsai_function void
 EatUntil(c_parse_result* Parser, c_token_type Close)
 {
   while (Remaining(&Parser->Tokens))
@@ -422,7 +422,7 @@ EatUntil(c_parse_result* Parser, c_token_type Close)
   }
 }
 
-function void
+bonsai_function void
 OutputErrorHelperLine(c_parse_result* Parser, c_token* ErrorToken, c_token Expected, counted_string ErrorString, u32 LineNumber)
 {
   Rewind(&Parser->Tokens);
@@ -488,7 +488,7 @@ OutputErrorHelperLine(c_parse_result* Parser, c_token* ErrorToken, c_token Expec
   return;
 }
 
-function void
+bonsai_function void
 OutputParsingError(c_parse_result* Parser, c_token* ErrorToken, c_token ExpectedToken, counted_string ErrorString)
 {
   u32 LinesOfContext = 4;
@@ -544,14 +544,14 @@ OutputParsingError(c_parse_result* Parser, c_token* ErrorToken, c_token Expected
   return;
 }
 
-function void
+bonsai_function void
 OutputParsingError(c_parse_result* Parser, c_token* ErrorToken, counted_string ErrorString)
 {
   OutputParsingError(Parser, ErrorToken, CToken(CTokenType_Unknown), ErrorString);
   return;
 }
 
-function c_token
+bonsai_function c_token
 RequireToken(c_parse_result* Parser, c_token ExpectedToken)
 {
   c_token* ErrorToken = PeekTokenPointer(Parser);
@@ -571,7 +571,7 @@ RequireToken(c_parse_result* Parser, c_token ExpectedToken)
   return Result;
 }
 
-function c_token
+bonsai_function c_token
 RequireToken(c_parse_result* Parser, c_token_type ExpectedType)
 {
   c_token Result = RequireToken(Parser, CToken(ExpectedType));
@@ -596,7 +596,7 @@ PushMember(d_union_decl* dUnion, c_token MemberIdentifierToken, d_union_flags Fl
   Push(&dUnion->Members, Member, Memory);
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateEnumDef(d_union_decl* dUnion, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -615,7 +615,7 @@ GenerateEnumDef(d_union_decl* dUnion, memory_arena* Memory)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateStructDef(d_union_decl* dUnion, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -657,7 +657,7 @@ GenerateStructDef(d_union_decl* dUnion, memory_arena* Memory)
   return Result;
 }
 
-function enum_def*
+bonsai_function enum_def*
 GetEnumByType(enum_def_stream* ProgramEnums, counted_string EnumType)
 {
   TIMED_FUNCTION();
@@ -678,7 +678,7 @@ GetEnumByType(enum_def_stream* ProgramEnums, counted_string EnumType)
   return Result;
 }
 
-function struct_def*
+bonsai_function struct_def*
 GetStructByType(struct_def_stream* ProgramStructs, counted_string StructType)
 {
   TIMED_FUNCTION();
@@ -784,7 +784,7 @@ ParseDiscriminatedUnion(c_parse_result* Parser, program_datatypes* Datatypes, co
   return dUnion;
 }
 
-function b32
+bonsai_function b32
 DoDebugWindow(const char** ArgStrings, s32 ArgCount)
 {
   b32 Result = False;
@@ -804,7 +804,7 @@ DoDebugWindow(const char** ArgStrings, s32 ArgCount)
 }
 
 
-function arguments
+bonsai_function arguments
 ParseArgs(const char** ArgStrings, s32 ArgCount, memory_arena* Memory)
 {
   arguments Result = {
@@ -849,7 +849,7 @@ ParseArgs(const char** ArgStrings, s32 ArgCount, memory_arena* Memory)
 
 global_variable random_series TempFileEntropy = {3215432};
 
-function b32
+bonsai_function b32
 Output(c_token_cursor Code, counted_string Filename, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -897,7 +897,7 @@ enum output_mode
   Output_Unsafe,
 };
 
-function b32
+bonsai_function b32
 Output(counted_string Code, counted_string OutputFilename, memory_arena* Memory, output_mode Mode = Output_NoOverwrite)
 {
   TIMED_FUNCTION();
@@ -964,7 +964,7 @@ Output(counted_string Code, counted_string OutputFilename, memory_arena* Memory,
   return Result;
 }
 
-function void
+bonsai_function void
 DumpStringStreamToConsole(counted_string_stream* Stream)
 {
   for (counted_string_iterator Iter = Iterator(Stream);
@@ -976,7 +976,7 @@ DumpStringStreamToConsole(counted_string_stream* Stream)
   }
 }
 
-function void
+bonsai_function void
 EatBetween(c_parse_result* Parser, c_token_type Open, c_token_type Close)
 {
   u32 Depth = 0;
@@ -1001,14 +1001,14 @@ EatBetween(c_parse_result* Parser, c_token_type Open, c_token_type Close)
   return;
 }
 
-function void
+bonsai_function void
 EatNextScope(c_parse_result* Parser)
 {
   EatBetween(Parser, CTokenType_OpenBrace, CTokenType_CloseBrace);
   return;
 }
 
-function void
+bonsai_function void
 EatUnionDef(c_parse_result* Parser)
 {
   EatNextScope(Parser);
@@ -1016,7 +1016,7 @@ EatUnionDef(c_parse_result* Parser)
   return;
 }
 
-function void
+bonsai_function void
 DumpCDeclStreamToConsole(c_decl_stream* Stream)
 {
   for (c_decl_iterator Iter = Iterator(Stream);
@@ -1057,7 +1057,7 @@ DumpCDeclStreamToConsole(c_decl_stream* Stream)
   }
 }
 
-function struct_def
+bonsai_function struct_def
 StructDef(counted_string Name)
 {
   struct_def Result = {};
@@ -1065,14 +1065,14 @@ StructDef(counted_string Name)
   return Result;
 }
 
-function b32
+bonsai_function b32
 EatStar(c_parse_result* Parser)
 {
   b32 Result = OptionalToken(Parser, CTokenType_Star);
   return Result;
 }
 
-function void
+bonsai_function void
 EatFunctionDecl(c_parse_result* Parser)
 {
   EatBetween(Parser, CTokenType_OpenParen, CTokenType_CloseParen);
@@ -1092,7 +1092,7 @@ EatFunctionDecl(c_parse_result* Parser)
 #define InvalidDefaultWhileParsing(Parser, ErrorMessage) \
     default: { OutputParsingError(Parser, Parser->Tokens.At, ErrorMessage); Assert(False); } break;
 
-function b32
+bonsai_function b32
 IsCxxDefinitionKeyword(counted_string Value)
 {
   b32 Result = StringsMatch(Value, CS("volatile")) ||
@@ -1101,9 +1101,9 @@ IsCxxDefinitionKeyword(counted_string Value)
   return Result;
 }
 
-function struct_def ParseStructBody(c_parse_result* Parser, counted_string StructName, memory_arena* Memory);
+bonsai_function struct_def ParseStructBody(c_parse_result* Parser, counted_string StructName, memory_arena* Memory);
 
-function c_decl
+bonsai_function c_decl
 ParseDeclaration(c_parse_result* Parser, counted_string StructName, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1239,14 +1239,14 @@ ParseDeclaration(c_parse_result* Parser, counted_string StructName, memory_arena
   return Result;
 }
 
-function void
+bonsai_function void
 DumpStruct(struct_def* Struct)
 {
   Log("%.*s\n", Struct->Name.Count, Struct->Name.Start);
   DumpCDeclStreamToConsole(&Struct->Fields);
 }
 
-function void
+bonsai_function void
 PrintCDecl(c_decl* Decl, struct_def_stream* ProgramStructs)
 {
   switch (Decl->Type)
@@ -1308,7 +1308,7 @@ struct for_member_constraints
   counted_string ValueName;
 };
 
-function void
+bonsai_function void
 TrimFirstToken(c_parse_result* Parser, c_token_type TokenType)
 {
   Assert(Parser->Tokens.At == Parser->Tokens.Start);
@@ -1316,7 +1316,7 @@ TrimFirstToken(c_parse_result* Parser, c_token_type TokenType)
   Parser->Tokens.Start = Parser->Tokens.At;
 }
 
-function void
+bonsai_function void
 TrimLastToken(c_parse_result* Parser, c_token_type TokenType)
 {
   c_token* CurrentToken = Parser->Tokens.End-1;
@@ -1334,7 +1334,7 @@ TrimLastToken(c_parse_result* Parser, c_token_type TokenType)
   }
 }
 
-function void
+bonsai_function void
 TrimTrailingWhitespace(c_parse_result* Parser)
 {
   c_token* CurrentToken = Parser->Tokens.End-1;
@@ -1354,7 +1354,7 @@ TrimTrailingWhitespace(c_parse_result* Parser)
   }
 }
 
-function b32
+bonsai_function b32
 HasMemberOfType(struct_def* Struct, counted_string MemberType)
 {
   b32 Result = False;
@@ -1382,7 +1382,7 @@ HasMemberOfType(struct_def* Struct, counted_string MemberType)
   return Result;
 }
 
-function c_parse_result
+bonsai_function c_parse_result
 GetBodyTextForNextScope(c_parse_result* Parser)
 {
   c_parse_result BodyText = *Parser;
@@ -1399,7 +1399,7 @@ GetBodyTextForNextScope(c_parse_result* Parser)
   return BodyText;
 }
 
-function counted_string
+bonsai_function counted_string
 ParseForEnumValues(c_parse_result* Parser, counted_string TypeName, enum_def_stream* ProgramEnums, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1457,7 +1457,7 @@ ParseForEnumValues(c_parse_result* Parser, counted_string TypeName, enum_def_str
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 DoTokenSubstitution(c_parse_result* BodyText, for_member_constraints* Constraints, c_decl Element, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1489,7 +1489,7 @@ DoTokenSubstitution(c_parse_result* BodyText, for_member_constraints* Constraint
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 ParseForMembers(c_parse_result* Parser, struct_def* Target, struct_def_stream* ProgramStructs, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1576,7 +1576,7 @@ ParseForMembers(c_parse_result* Parser, struct_def* Target, struct_def_stream* P
   return Result;
 }
 
-function struct_def
+bonsai_function struct_def
 ParseStructBody(c_parse_result* Parser, counted_string StructName, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1602,7 +1602,7 @@ ParseStructBody(c_parse_result* Parser, counted_string StructName, memory_arena*
   return Result;
 }
 
-function enum_def
+bonsai_function enum_def
 ParseEnum(c_parse_result* Parser, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1642,7 +1642,7 @@ ParseEnum(c_parse_result* Parser, memory_arena* Memory)
   return Enum;
 }
 
-function program_datatypes
+bonsai_function program_datatypes
 ParseAllDatatypes(c_parse_result_cursor Files_in, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1731,7 +1731,7 @@ ParseAllDatatypes(c_parse_result_cursor Files_in, memory_arena* Memory)
   return Result;
 }
 
-function c_parse_result_cursor
+bonsai_function c_parse_result_cursor
 AllocateTokenizedFiles(u32 Count, memory_arena* Memory)
 {
   c_parse_result* Start = Allocate(c_parse_result, Memory, Count);
@@ -1744,7 +1744,7 @@ AllocateTokenizedFiles(u32 Count, memory_arena* Memory)
   return Result;
 }
 
-function c_parse_result_cursor
+bonsai_function c_parse_result_cursor
 TokenizeAllFiles(counted_string_cursor* Filenames, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1775,14 +1775,14 @@ TokenizeAllFiles(counted_string_cursor* Filenames, memory_arena* Memory)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateValueTableFor(enum_def* Enum, memory_arena* Memory)
 {
   TIMED_FUNCTION();
   counted_string FunctionName = ToCapitalCase(Enum->Name, Memory);
   counted_string Result = FormatCountedString(Memory,
 CSz(R"INLINE_CODE(
-function %.*s
+bonsai_function %.*s
 %.*s(counted_string S)
 {
   %.*s Result = {};
@@ -1808,7 +1808,7 @@ function %.*s
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateCursorFor(counted_string DatatypeName, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1831,7 +1831,7 @@ struct %.*s_cursor
   counted_string ConstructorName = ToCapitalCase(DatatypeName, Memory);
   counted_string ConstructorDef = FormatCountedString(Memory,
 CSz(R"INLINE_CODE(
-function %.*s_cursor
+bonsai_function %.*s_cursor
 %.*sCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?
@@ -1857,13 +1857,13 @@ function %.*s_cursor
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateStringTableFor(enum_def* Enum, memory_arena* Memory)
 {
   TIMED_FUNCTION();
   counted_string Result = FormatCountedString(Memory,
 CSz(R"INLINE_CODE(
-function counted_string
+bonsai_function counted_string
 ToString(%.*s Type)
 {
   counted_string Result = {};
@@ -1884,7 +1884,7 @@ ToString(%.*s Type)
   return Result;
 }
 
-function counted_string
+bonsai_function counted_string
 GenerateStreamFor(counted_string StructName, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -1913,7 +1913,7 @@ struct %.*s_stream
 
   counted_string PushCode = FormatCountedString(Memory,
 CSz(R"INLINE_CODE(
-function void
+bonsai_function void
 Push(%.*s_stream* Stream, %.*s Element, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?
@@ -1953,7 +1953,7 @@ struct %.*s_iterator
   %.*s_stream_chunk* At;
 };
 
-function %.*s_iterator
+bonsai_function %.*s_iterator
 Iterator(%.*s_stream* Stream)
 {
   %.*s_iterator Iterator = {
@@ -1963,14 +1963,14 @@ Iterator(%.*s_stream* Stream)
   return Iterator;
 }
 
-function b32
+bonsai_function b32
 IsValid(%.*s_iterator* Iter)
 {
   b32 Result = Iter->At != 0;
   return Result;
 }
 
-function void
+bonsai_function void
 Advance(%.*s_iterator* Iter)
 {
   Iter->At = Iter->At->Next;
@@ -1995,7 +1995,7 @@ Advance(%.*s_iterator* Iter)
   return Result;
 }
 
-function metaprogramming_directive
+bonsai_function metaprogramming_directive
 GetMetaprogrammingDirective(c_parse_result* Parser)
 {
   metaprogramming_directive Result = MetaprogrammingDirective(RequireToken(Parser, CTokenType_Identifier).Value);
@@ -2004,7 +2004,7 @@ GetMetaprogrammingDirective(c_parse_result* Parser)
   return Result;
 }
 
-function void
+bonsai_function void
 DoWorkToOutputThisStuff(c_parse_result* Parser, counted_string OutputForThisParser, counted_string NewFilename, memory_arena* Memory)
 {
   TIMED_FUNCTION();
@@ -2075,7 +2075,7 @@ debug_global platform Plat = {};
 // TODO(Jesse): Remove this?
 debug_global os Os = {};
 
-function b32
+bonsai_function b32
 BootstrapDebugSystem(b32 OpenDebugWindow)
 {
   shared_lib DebugLib = OpenLibrary(DEFAULT_DEBUG_LIB);

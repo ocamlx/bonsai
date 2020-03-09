@@ -12,7 +12,7 @@ struct enum_field_stream
 };
 
 
-function void
+bonsai_function void
 Push(enum_field_stream* Stream, enum_field Element, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?
@@ -44,7 +44,7 @@ struct enum_field_iterator
   enum_field_stream_chunk* At;
 };
 
-function enum_field_iterator
+bonsai_function enum_field_iterator
 Iterator(enum_field_stream* Stream)
 {
   enum_field_iterator Iterator = {
@@ -54,14 +54,14 @@ Iterator(enum_field_stream* Stream)
   return Iterator;
 }
 
-function b32
+bonsai_function b32
 IsValid(enum_field_iterator* Iter)
 {
   b32 Result = Iter->At != 0;
   return Result;
 }
 
-function void
+bonsai_function void
 Advance(enum_field_iterator* Iter)
 {
   Iter->At = Iter->At->Next;

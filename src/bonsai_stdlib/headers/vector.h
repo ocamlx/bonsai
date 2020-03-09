@@ -88,7 +88,7 @@ union v4
 };
 
 
-function v4
+bonsai_function v4
 V4(v3 v, float w)
 {
   v4 Result = {
@@ -100,7 +100,7 @@ V4(v3 v, float w)
   return Result;
 }
 
-function v4
+bonsai_function v4
 V4(r32 Fill)
 {
   v4 Result = {
@@ -112,7 +112,7 @@ V4(r32 Fill)
   return Result;
 }
 
-function v4
+bonsai_function v4
 V4( float x, float y, float z, float w)
 {
   v4 Result = {
@@ -264,9 +264,9 @@ operator+(v3 Vec, voxel_position Pos)
 {
   v3 Result;
 
-  Result.x = Vec.x + Pos.x;
-  Result.y = Vec.y + Pos.y;
-  Result.z = Vec.z + Pos.z;
+  Result.x = Vec.x + (r32)Pos.x;
+  Result.y = Vec.y + (r32)Pos.y;
+  Result.z = Vec.z + (r32)Pos.z;
 
   return Result;
 }
@@ -308,9 +308,9 @@ operator-(v3 Vec, voxel_position Pos)
 {
   v3 Result;
 
-  Result.x = Vec.x - Pos.x;
-  Result.y = Vec.y - Pos.y;
-  Result.z = Vec.z - Pos.z;
+  Result.x = Vec.x - (r32)Pos.x;
+  Result.y = Vec.y - (r32)Pos.y;
+  Result.z = Vec.z - (r32)Pos.z;
 
   return Result;
 }
@@ -494,9 +494,9 @@ operator*(voxel_position P1, float f)
 {
   v3 Result;
 
-  Result.x = P1.x * f;
-  Result.y = P1.y * f;
-  Result.z = P1.z * f;
+  Result.x = P1.x * (s32)f;
+  Result.y = P1.y * (s32)f;
+  Result.z = P1.z * (s32)f;
 
   return Result;
 }

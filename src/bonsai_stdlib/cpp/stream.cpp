@@ -55,7 +55,8 @@ V3Cursor(u32 Count, memory_arena *Memory)
 u8_stream
 U8_StreamFromFile(const char* SourceFile, memory_arena *Memory)
 {
-  FILE *File = fopen(SourceFile, "r");
+#if 0
+  FILE File = fopen(SourceFile, "r");
   u8* FileContents = 0;
   umm FileSize = 0;
 
@@ -85,6 +86,10 @@ U8_StreamFromFile(const char* SourceFile, memory_arena *Memory)
     FileContents + FileSize
   };
 
+#else
+	NotImplemented;
+	u8_stream Result = {};
+#endif
   return Result;
 }
 

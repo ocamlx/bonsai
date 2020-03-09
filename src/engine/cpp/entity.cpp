@@ -206,7 +206,7 @@ AllocateEntity(memory_arena *Memory, chunk_dimension ModelDim)
   return Entity;
 }
 
-function entity**
+bonsai_function entity**
 AllocateEntityTable(memory_arena* Memory, u32 Count)
 {
   entity** Result = Allocate(entity*, Memory, Count);
@@ -1083,6 +1083,7 @@ SimulateEntities(world* World, entity** EntityTable, r32 dt, chunk_dimension Vis
   return;
 }
 
+#if 0
 entity *
 GetPlayer(entity **Players, client_state *OurClient)
 {
@@ -1095,6 +1096,7 @@ GetPlayer(entity **Players, client_state *OurClient)
 
   return Player;
 }
+#endif
 
 inline void
 SimulateAndRenderParticleSystems(entity** EntityTable, chunk_dimension WorldChunkDim, untextured_3d_geometry_buffer* GeoDest, graphics *Graphics, r32 Dt)

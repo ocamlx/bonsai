@@ -1,9 +1,9 @@
 
 // Wrapper so assertions give us file/line numbers
-#define AssertNoGlErrors {            \
-  u32 glErrorNo = glGetError();       \
-  DumpGlErrorEnum(glErrorNo);         \
-  Assert(glErrorNo == GL_NO_ERROR); }
+#define AssertNoGlErrors do {   \
+  u32 glErrorNo = glGetError(); \
+  DumpGlErrorEnum(glErrorNo);   \
+  Assert(glErrorNo == GL_NO_ERROR); } while (false)
 
 #define GL_NO_ERROR                       0
 
@@ -266,7 +266,7 @@ exported_function GLboolean glUnmapBuffer (GLenum target);
 
 exported_function void glDrawBuffers (GLsizei n, const GLenum *bufs);
 
-function void
+bonsai_function void
 DumpGlErrorEnum(u32 Error)
 {
   if ( Error != 0 )
@@ -325,7 +325,7 @@ DumpGlErrorEnum(u32 Error)
   return;
 }
 
-function b32
+bonsai_function b32
 CheckShadingLanguageVersion()
 {
   char *OpenGlVersion = (char*)glGetString ( GL_VERSION );

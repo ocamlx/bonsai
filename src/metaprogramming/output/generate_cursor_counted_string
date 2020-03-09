@@ -6,7 +6,7 @@ struct counted_string_cursor
   counted_string* At;
 };
 
-function counted_string_cursor
+bonsai_function counted_string_cursor
 CountedStringCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

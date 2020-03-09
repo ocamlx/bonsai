@@ -6,7 +6,7 @@ struct c_parse_result_cursor
   c_parse_result* At;
 };
 
-function c_parse_result_cursor
+bonsai_function c_parse_result_cursor
 CParseResultCursor(umm ElementCount, memory_arena* Memory)
 {
   // TODO(Jesse): Can we use Allocate() here instead?

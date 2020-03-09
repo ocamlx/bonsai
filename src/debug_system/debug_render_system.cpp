@@ -8,7 +8,7 @@
 
 
 
-function void
+bonsai_function void
 AdvanceSpaces(u32 N, layout *Layout, v2 FontSize)
 {
   Layout->At.x += (N*FontSize.x);
@@ -16,7 +16,7 @@ AdvanceSpaces(u32 N, layout *Layout, v2 FontSize)
   return;
 }
 
-function void
+bonsai_function void
 NewLine(layout *Layout)
 {
   r32 VerticalAdvance = 0;
@@ -33,7 +33,7 @@ NewLine(layout *Layout)
   return;
 }
 
-function v2
+bonsai_function v2
 GetTextBounds(u32 TextLength, font* Font)
 {
   v2 Result = {};
@@ -42,7 +42,7 @@ GetTextBounds(u32 TextLength, font* Font)
   return Result;
 }
 
-function v3
+bonsai_function v3
 SelectColorState(render_state* RenderState, ui_style *Style)
 {
   v3 Result = Style->Color;
@@ -71,7 +71,7 @@ SelectColorState(render_state* RenderState, ui_style *Style)
 
 
 
-function void
+bonsai_function void
 FlushBuffer(debug_text_render_group *TextGroup, untextured_2d_geometry_buffer *Buffer, v2 ScreenDim)
 {
   TIMED_FUNCTION();
@@ -102,7 +102,7 @@ FlushBuffer(debug_text_render_group *TextGroup, untextured_2d_geometry_buffer *B
   return;
 }
 
-function void
+bonsai_function void
 FlushBuffer(debug_text_render_group *TextGroup, textured_2d_geometry_buffer *Geo, v2 ScreenDim)
 {
   if (TextGroup)
@@ -143,7 +143,7 @@ FlushBuffer(debug_text_render_group *TextGroup, textured_2d_geometry_buffer *Geo
 
 }
 
-function void
+bonsai_function void
 FlushBuffers(debug_ui_render_group *UiGroup, v2 ScreenDim)
 {
   if (UiGroup->TextGroup)
@@ -155,7 +155,7 @@ FlushBuffers(debug_ui_render_group *UiGroup, v2 ScreenDim)
   return;
 }
 
-function void
+bonsai_function void
 BufferQuadUVs(textured_2d_geometry_buffer* Geo, rect2 UV, debug_texture_array_slice Slice)
 {
   v3 LeftTop    = V3(UV.Min.x, UV.Min.y, (r32)Slice);
@@ -175,7 +175,7 @@ BufferQuadUVs(textured_2d_geometry_buffer* Geo, rect2 UV, debug_texture_array_sl
   return;
 }
 
-function rect2
+bonsai_function rect2
 UVsForFullyCoveredQuad(void)
 {
   // Note(Jesse): These are weird compared to what you might expect because
@@ -189,7 +189,7 @@ UVsForFullyCoveredQuad(void)
   return Result;
 }
 
-function rect2
+bonsai_function rect2
 UVsForChar(u8 C)
 {
   r32 OneOverSixteen = 1.0f/16.0f;
@@ -206,7 +206,7 @@ UVsForChar(u8 C)
   return Result;
 }
 
-template <typename T> function void
+template <typename T> bonsai_function void
 BufferColorsDirect(T* Geo, v3 Color)
 {
   v3* Colors = Geo->Colors;
@@ -224,7 +224,7 @@ BufferColorsDirect(T* Geo, v3 Color)
   return;
 }
 
-template <typename T> function void
+template <typename T> bonsai_function void
 BufferColors(debug_ui_render_group *Group, T *Geo, v3 Color)
 {
   if (!BufferHasRoomFor(Geo, u32_COUNT_PER_QUAD))
@@ -233,7 +233,7 @@ BufferColors(debug_ui_render_group *Group, T *Geo, v3 Color)
   BufferColorsDirect(Geo, Color);
 }
 
-template <typename T>function clip_result
+template <typename T>bonsai_function clip_result
 BufferQuadDirect(T *Geo, v2 MinP, v2 Dim, r32 Z, v2 ScreenDim, v2 MaxClip)
 {
   // Note(Jesse): Z==0 | far-clip
@@ -315,7 +315,7 @@ BufferQuadDirect(T *Geo, v2 MinP, v2 Dim, r32 Z, v2 ScreenDim, v2 MaxClip)
   return Result;
 }
 
-function clip_result
+bonsai_function clip_result
 BufferTexturedQuad(debug_ui_render_group *Group,
                    debug_texture_array_slice TextureSlice,
                    v2 MinP, v2 Dim, rect2 UV, v3 Color, r32 Z, v2 MaxClip)
@@ -367,7 +367,7 @@ BufferTexturedQuad(debug_ui_render_group *Group,
   return Result;
 }
 
-function clip_result
+bonsai_function clip_result
 BufferUntexturedQuad(debug_ui_render_group *Group, untextured_2d_geometry_buffer *Geo,
                      v2 MinP, v2 Dim, v3 Color, r32 Z, v2 MaxClip)
 {
@@ -394,7 +394,7 @@ BufferUntexturedQuad(debug_ui_render_group *Group, untextured_2d_geometry_buffer
   return Result;
 }
 
-function clip_result
+bonsai_function clip_result
 BufferUntexturedQuad(debug_ui_render_group *Group, untextured_2d_geometry_buffer *Geo,
                          rect2 Rect, v3 Color, r32 Z, v2 MaxClip)
 {
@@ -404,7 +404,7 @@ BufferUntexturedQuad(debug_ui_render_group *Group, untextured_2d_geometry_buffer
   return Result;
 }
 
-function r32
+bonsai_function r32
 BufferChar(debug_ui_render_group *Group, u8 Char, v2 MinP, v2 FontSize, v3 Color, r32 Z, v2 MaxClip)
 {
   rect2 UV = UVsForChar(Char);
@@ -422,7 +422,7 @@ BufferChar(debug_ui_render_group *Group, u8 Char, v2 MinP, v2 FontSize, v3 Color
   return DeltaX;
 }
 
-function r32
+bonsai_function r32
 BufferChar(debug_ui_render_group *Group, u8 Char, v2 MinP, v2 FontSize, u32 Color, r32 Z, v2 MaxClip)
 {
   v3 ColorVector = GetColorData(Color).xyz;
@@ -430,7 +430,7 @@ BufferChar(debug_ui_render_group *Group, u8 Char, v2 MinP, v2 FontSize, u32 Colo
   return Result;
 }
 
-function void
+bonsai_function void
 BufferBorder(debug_ui_render_group *Group, rect2 Rect, v3 Color, r32 Z, v2 MaxClip)
 {
   v2 TopLeft     = Rect.Min;
@@ -451,7 +451,7 @@ BufferBorder(debug_ui_render_group *Group, rect2 Rect, v3 Color, r32 Z, v2 MaxCl
   return;
 }
 
-function void
+bonsai_function void
 BufferBorder(debug_ui_render_group *Group, interactable* PickerListInteraction, v3 Color, r32 Z, v2 MaxClip)
 {
   rect2 Bounds = RectMinMax(PickerListInteraction->MinP, PickerListInteraction->MaxP);
@@ -459,7 +459,7 @@ BufferBorder(debug_ui_render_group *Group, interactable* PickerListInteraction, 
   return;
 }
 
-function void
+bonsai_function void
 AdvanceLayoutStackBy(v2 Delta, layout* Layout)
 {
   while (Layout) {
@@ -469,7 +469,7 @@ AdvanceLayoutStackBy(v2 Delta, layout* Layout)
   }
 }
 
-function void
+bonsai_function void
 BufferValue(counted_string Text, debug_ui_render_group *Group, layout* Layout, v3 Color, ui_style* Style = &DefaultUiStyle, r32 Z = 1.0f, v2 MaxClip = DISABLE_CLIPPING)
 {
   r32 xDelta = 0;
@@ -495,7 +495,7 @@ BufferValue(counted_string Text, debug_ui_render_group *Group, layout* Layout, v
   return;
 }
 
-function void
+bonsai_function void
 BufferValue(counted_string Text, debug_ui_render_group *Group, render_state* RenderState, ui_style* Style)
 {
   layout* Layout = RenderState->Layout;
@@ -507,7 +507,7 @@ BufferValue(counted_string Text, debug_ui_render_group *Group, render_state* Ren
   return;
 }
 
-function r32
+bonsai_function r32
 BufferTextAt(debug_ui_render_group *Group, v2 BasisP, counted_string Text, v2 FontSize, v3 Color, r32 Z, v2 ClipMax = DISABLE_CLIPPING)
 {
   r32 DeltaX = 0;
@@ -537,7 +537,7 @@ BufferTextAt(debug_ui_render_group *Group, v2 BasisP, counted_string Text, v2 Fo
 // @respect_invalid_render_command_index
 #define INVALID_RENDER_COMMAND_INDEX (u32_MAX)
 
-function u32
+bonsai_function u32
 PushUiRenderCommand(debug_ui_render_group *Group, ui_render_command* Command)
 {
   ui_render_command_buffer *CommandBuffer = Group->CommandBuffer;
@@ -559,7 +559,7 @@ PushUiRenderCommand(debug_ui_render_group *Group, ui_render_command* Command)
   return Result;
 }
 
-function void
+bonsai_function void
 PushNewRow(debug_ui_render_group *Group)
 {
   ui_render_command Command = {
@@ -571,7 +571,7 @@ PushNewRow(debug_ui_render_group *Group)
   return;
 }
 
-function void
+bonsai_function void
 Text(debug_ui_render_group* Group, counted_string String)
 {
   ui_render_command Command = {
@@ -587,7 +587,7 @@ Text(debug_ui_render_group* Group, counted_string String)
   return;
 }
 
-function void
+bonsai_function void
 StartColumn(debug_ui_render_group *Group, ui_style* Style = 0, v4 Padding = V4(0), column_render_params Params = ColumnRenderParam_RightAlign)
 {
   ui_render_command Command = {
@@ -604,7 +604,7 @@ StartColumn(debug_ui_render_group *Group, ui_style* Style = 0, v4 Padding = V4(0
   return;
 }
 
-function void
+bonsai_function void
 EndColumn(debug_ui_render_group* Group)
 {
   ui_render_command Command = {
@@ -616,7 +616,7 @@ EndColumn(debug_ui_render_group* Group)
   return;
 }
 
-function void
+bonsai_function void
 PushColumn(debug_ui_render_group *Group, counted_string String, ui_style* Style = 0, v4 Padding = V4(0), column_render_params Params = ColumnRenderParam_RightAlign)
 {
   StartColumn(Group, Style, Padding, Params);
@@ -626,7 +626,7 @@ PushColumn(debug_ui_render_group *Group, counted_string String, ui_style* Style 
   return;
 }
 
-function void
+bonsai_function void
 PushTextAt(debug_ui_render_group *Group, counted_string Text, v2 At, v2 ClipMax)
 {
   ui_render_command Command = {
@@ -642,14 +642,14 @@ PushTextAt(debug_ui_render_group *Group, counted_string Text, v2 At, v2 ClipMax)
   return;
 }
 
-function void
+bonsai_function void
 PushTooltip(debug_ui_render_group *Group, counted_string Text)
 {
   PushTextAt(Group, Text, *Group->MouseP+V2(12, -7), DISABLE_CLIPPING);
   return;
 }
 
-function void
+bonsai_function void
 PushTexturedQuad(debug_ui_render_group *Group, debug_texture_array_slice TextureSlice, z_depth zDepth)
 {
   ui_render_command Command = {
@@ -664,7 +664,7 @@ PushTexturedQuad(debug_ui_render_group *Group, debug_texture_array_slice Texture
   return;
 }
 
-function void
+bonsai_function void
 PushUntexturedQuadAt(debug_ui_render_group* Group, v2 At, v2 QuadDim, z_depth zDepth, ui_style *Style = 0 )
 {
   ui_render_command Command =
@@ -686,7 +686,7 @@ PushUntexturedQuadAt(debug_ui_render_group* Group, v2 At, v2 QuadDim, z_depth zD
   PushUiRenderCommand(Group, &Command);
 }
 
-function void
+bonsai_function void
 PushUntexturedQuad(debug_ui_render_group* Group, v2 Offset, v2 QuadDim, z_depth zDepth, ui_style *Style = 0, v4 Padding = V4(0), quad_render_params Params = QuadRenderParam_Default )
 {
   ui_render_command Command = {
@@ -712,7 +712,7 @@ PushUntexturedQuad(debug_ui_render_group* Group, v2 Offset, v2 QuadDim, z_depth 
   return;
 }
 
-function void
+bonsai_function void
 PushButtonEnd(debug_ui_render_group *Group, button_end_params Params = ButtonEndParam_NoOp)
 {
   ui_render_command Command = {
@@ -723,7 +723,7 @@ PushButtonEnd(debug_ui_render_group *Group, button_end_params Params = ButtonEnd
   return;
 }
 
-function interactable_handle
+bonsai_function interactable_handle
 PushButtonStart(debug_ui_render_group *Group, umm InteractionId, ui_style* Style = 0)
 {
   ui_render_command Command = {
@@ -741,7 +741,7 @@ PushButtonStart(debug_ui_render_group *Group, umm InteractionId, ui_style* Style
   return Handle;
 }
 
-function ui_element_reference
+bonsai_function ui_element_reference
 PushTableStart(debug_ui_render_group* Group, relative_position Position = Position_None,  ui_element_reference RelativeTo = {})
 {
   ui_render_command Command = {
@@ -760,7 +760,7 @@ PushTableStart(debug_ui_render_group* Group, relative_position Position = Positi
   return Result;
 }
 
-function void
+bonsai_function void
 PushTableEnd(debug_ui_render_group *Group)
 {
   ui_render_command Command = {
@@ -772,7 +772,7 @@ PushTableEnd(debug_ui_render_group *Group)
   return;
 }
 
-function void
+bonsai_function void
 PushBorder(debug_ui_render_group *Group, rect2 BoundsRelativeToCurrentWindow, v3 Color)
 {
   ui_render_command Command = {
@@ -785,7 +785,7 @@ PushBorder(debug_ui_render_group *Group, rect2 BoundsRelativeToCurrentWindow, v3
 
 }
 
-function void
+bonsai_function void
 PushWindowStart(debug_ui_render_group *Group, window_layout *Window)
 {
   umm TitleBarInteractionId = (umm)"WindowTitleBar"^(umm)Window;
@@ -858,7 +858,7 @@ PushWindowStart(debug_ui_render_group *Group, window_layout *Window)
   return;
 }
 
-function void
+bonsai_function void
 PushWindowEnd(debug_ui_render_group *Group, window_layout *Window)
 {
   ui_render_command EndCommand = {};
@@ -876,7 +876,7 @@ PushWindowEnd(debug_ui_render_group *Group, window_layout *Window)
 
 
 
-function button_interaction_result
+bonsai_function button_interaction_result
 ButtonInteraction(debug_ui_render_group* Group, rect2 Bounds, umm InteractionId, window_layout *Window, ui_style *Style)
 {
   button_interaction_result Result = {};
@@ -913,7 +913,7 @@ ButtonInteraction(debug_ui_render_group* Group, rect2 Bounds, umm InteractionId,
   return Result;
 }
 
-function b32
+bonsai_function b32
 Button(debug_ui_render_group* Group, counted_string ButtonName, umm ButtonId, ui_style* Style = 0, v4 Padding = V4(0))
 {
   // TODO(Jesse): Do we have to pass the style to both of these functions, and
@@ -945,7 +945,7 @@ Button(debug_ui_render_group* Group, counted_string ButtonName, umm ButtonId, ui
   Assert((Command)->Type == type_ui_render_command_##TypeName)
 
 
-function void
+bonsai_function void
 PushLayout(layout** Dest, layout* Layout)
 {
   Assert(!Layout->Prev);
@@ -956,7 +956,7 @@ PushLayout(layout** Dest, layout* Layout)
   AdvanceLayoutStackBy(Pad, Layout);
 }
 
-function layout*
+bonsai_function layout*
 PopLayout(layout** Layout)
 {
   layout* PoppedLayout = *Layout;
@@ -975,7 +975,7 @@ PopLayout(layout** Layout)
   return PoppedLayout;
 }
 
-function ui_render_command*
+bonsai_function ui_render_command*
 GetCommand(ui_render_command_buffer* CommandBuffer, u32 CommandIndex)
 {
   ui_render_command* Command = 0;
@@ -984,7 +984,7 @@ GetCommand(ui_render_command_buffer* CommandBuffer, u32 CommandIndex)
   return Command;
 }
 
-function window_layout*
+bonsai_function window_layout*
 GetHighestWindow(debug_ui_render_group* Group, ui_render_command_buffer* CommandBuffer)
 {
   u64 HighestInteractionStackIndex = 0;
@@ -1025,7 +1025,7 @@ GetHighestWindow(debug_ui_render_group* Group, ui_render_command_buffer* Command
   return HighestWindow;
 }
 
-function void
+bonsai_function void
 ProcessButtonStart(debug_ui_render_group* Group, render_state* RenderState, umm ButtonId)
 {
   if (ButtonId == Group->HoverInteractionId)
@@ -1049,7 +1049,7 @@ ProcessButtonStart(debug_ui_render_group* Group, render_state* RenderState, umm 
   return;
 }
 
-function void
+bonsai_function void
 ProcessButtonEnd(debug_ui_render_group *Group, umm InteractionId, render_state* RenderState, rect2 AbsButtonBounds, ui_style* Style)
 {
   Assert(InteractionId);
@@ -1082,7 +1082,7 @@ ProcessButtonEnd(debug_ui_render_group *Group, umm InteractionId, render_state* 
   return;
 }
 
-function void
+bonsai_function void
 ProcessTexturedQuadPush(debug_ui_render_group* Group, ui_render_command_textured_quad *Command, render_state* RenderState)
 {
   v2 MinP    = GetAbsoluteAt(RenderState->Layout);
@@ -1096,7 +1096,7 @@ ProcessTexturedQuadPush(debug_ui_render_group* Group, ui_render_command_textured
   Command->Layout.DrawBounds.Max = Clip.MaxClip - MinP;
 }
 
-function void
+bonsai_function void
 ProcessUntexturedQuadAtPush(debug_ui_render_group* Group, ui_render_command_untextured_quad_at *Command, render_state* RenderState)
 {
   v2 MaxClip = GetAbsoluteMaxClip(RenderState->Window);
@@ -1113,7 +1113,7 @@ ProcessUntexturedQuadAtPush(debug_ui_render_group* Group, ui_render_command_unte
   return;
 }
 
-function void
+bonsai_function void
 ProcessUntexturedQuadPush(debug_ui_render_group* Group, ui_render_command_untextured_quad *Command, render_state* RenderState)
 {
   v2 MaxClip = GetAbsoluteMaxClip(RenderState->Window);
@@ -1139,7 +1139,7 @@ ProcessUntexturedQuadPush(debug_ui_render_group* Group, ui_render_command_untext
   return;
 }
 
-function window_sort_params
+bonsai_function window_sort_params
 GetWindowSortParams(ui_render_command_buffer *CommandBuffer)
 {
   window_sort_params Result = {};
@@ -1190,7 +1190,7 @@ GetWindowSortParams(ui_render_command_buffer *CommandBuffer)
   return Result;
 }
 
-function void
+bonsai_function void
 BubbleSort(sort_key* Keys, u32 Count)
 {
   for (u32 Ignored = 0;
@@ -1221,7 +1221,7 @@ BubbleSort(sort_key* Keys, u32 Count)
   return;
 }
 
-function void
+bonsai_function void
 SetWindowZDepths(ui_render_command_buffer *CommandBuffer)
 {
   window_sort_params WindowSortParams = GetWindowSortParams(CommandBuffer);
@@ -1264,7 +1264,7 @@ struct find_command_result
   u32 Index;
 };
 
-function find_command_result
+bonsai_function find_command_result
 FindPreviousCommand(ui_render_command_buffer* CommandBuffer, ui_render_command_type CommandType, u32 StartingIndex)
 {
   Assert(StartingIndex < CommandBuffer->CommandCount);
@@ -1288,14 +1288,14 @@ FindPreviousCommand(ui_render_command_buffer* CommandBuffer, ui_render_command_t
   return Result;
 }
 
-function u32
+bonsai_function u32
 FindPreviousButtonStart(ui_render_command_buffer* CommandBuffer, u32 StartingIndex)
 {
   u32 Result = FindPreviousCommand(CommandBuffer, type_ui_render_command_button_start, StartingIndex).Index;
   return Result;
 }
 
-function rect2
+bonsai_function rect2
 FindAbsoluteDrawBoundsBetween(ui_render_command_buffer* CommandBuffer, u32 FirstCommand, u32 OnePastLastCommand)
 {
   Assert(FirstCommand < CommandBuffer->CommandCount);
@@ -1333,7 +1333,7 @@ FindAbsoluteDrawBoundsBetween(ui_render_command_buffer* CommandBuffer, u32 First
   return Result;
 }
 
-function rect2
+bonsai_function rect2
 FindRelativeDrawBoundsBetween(ui_render_command_buffer* CommandBuffer, v2 RelativeTo, u32 FirstCommand, u32 OnePastLastCommand)
 {
   rect2 Result = FindAbsoluteDrawBoundsBetween(CommandBuffer, FirstCommand, OnePastLastCommand);
@@ -1344,7 +1344,7 @@ FindRelativeDrawBoundsBetween(ui_render_command_buffer* CommandBuffer, v2 Relati
   return Result;
 }
 
-function u32
+bonsai_function u32
 PreprocessTable(ui_render_command_buffer* CommandBuffer, u32 StartingIndex)
 {
   u32 OnePastTableEnd = StartingIndex;
@@ -1474,14 +1474,14 @@ PreprocessTable(ui_render_command_buffer* CommandBuffer, u32 StartingIndex)
   return OnePastTableEnd;
 };
 
-function v2
+bonsai_function v2
 GetNextInlineElementBasis(render_state* RenderState)
 {
   v2 Result = GetAbsoluteAt(RenderState->Layout);
   return Result;
 }
 
-function void
+bonsai_function void
 FlushCommandBuffer(debug_ui_render_group *Group, ui_render_command_buffer *CommandBuffer)
 {
   layout DefaultLayout = {};
@@ -1651,7 +1651,7 @@ FlushCommandBuffer(debug_ui_render_group *Group, ui_render_command_buffer *Comma
 
 
 #if 0
-function void
+bonsai_function void
 DrawWaitingBar(mutex_op_record *WaitRecord, mutex_op_record *AquiredRecord, mutex_op_record *ReleasedRecord,
                debug_ui_render_group *Group, layout *Layout, u64 FrameStartingCycle, u64 FrameTotalCycles, r32 TotalGraphWidth, r32 Z, v2 MaxClip)
 {
@@ -1686,7 +1686,7 @@ DrawWaitingBar(mutex_op_record *WaitRecord, mutex_op_record *AquiredRecord, mute
 
 
 
-function void
+bonsai_function void
 ComputePickRay(platform *Plat, m4* ViewProjection)
 {
   debug_state *DebugState = GetDebugState();
@@ -1718,7 +1718,7 @@ ComputePickRay(platform *Plat, m4* ViewProjection)
   return;
 }
 
-function void
+bonsai_function void
 PushChunkView(debug_ui_render_group* Group, world_chunk* Chunk, window_layout* Window)
 {
   debug_state* DebugState = GetDebugState();
@@ -1786,7 +1786,7 @@ PushChunkView(debug_ui_render_group* Group, world_chunk* Chunk, window_layout* W
   UpdateGameCamera( -0.005f*(*Group->MouseDP), WindowInput, Canonical_Position(0), &DebugState->Camera, Chunk_Dimension(0,0,0));
 }
 
-function void
+bonsai_function void
 PushChunkDetails(debug_ui_render_group* Group, world_chunk* Chunk, window_layout* Window)
 {
   PushWindowStart(Group, Window);
@@ -1812,14 +1812,14 @@ PushChunkDetails(debug_ui_render_group* Group, world_chunk* Chunk, window_layout
   PushWindowEnd(Group, Window);
 }
 
-function v2
+bonsai_function v2
 BasisRightOf(window_layout* Window, v2 WindowSpacing = V2(50, 0))
 {
   v2 Result = V2(GetAbsoluteMaxClip(Window).x, Window->Basis.y) + WindowSpacing;
   return Result;
 }
 
-function void
+bonsai_function void
 DrawPickedChunks(debug_ui_render_group* Group)
 {
   debug_state* DebugState = GetDebugState();
@@ -1909,14 +1909,14 @@ DrawPickedChunks(debug_ui_render_group* Group)
 
 
 
-function counted_string
+bonsai_function counted_string
 BuildNameStringFor(char Prefix, counted_string Name, u32 DepthAdvance)
 {
   counted_string Result = FormatCountedString(TranArena, CSz("%*c%S"), DepthAdvance, Prefix, Name);
   return Result;
 }
 
-function void
+bonsai_function void
 BufferScopeTreeEntry(debug_ui_render_group *Group, debug_profile_scope *Scope,
                      u64 TotalCycles, u64 TotalFrameCycles, u64 CallCount, u32 Depth)
 {
@@ -1947,7 +1947,7 @@ BufferScopeTreeEntry(debug_ui_render_group *Group, debug_profile_scope *Scope,
 }
 
 #if 0
-function scope_stats
+bonsai_function scope_stats
 GetStatsFor( debug_profile_scope *Target, debug_profile_scope *Root)
 {
   scope_stats Result = {};
@@ -1990,7 +1990,7 @@ GetStatsFor( debug_profile_scope *Target, debug_profile_scope *Root)
 }
 #endif
 
-function void
+bonsai_function void
 PushCycleBar(debug_ui_render_group* Group, cycle_range* Range, cycle_range* Frame, r32 TotalGraphWidth, u32 Depth, ui_style *Style)
 {
   Assert(Frame->StartCycle < Range->StartCycle);
@@ -2012,7 +2012,7 @@ PushCycleBar(debug_ui_render_group* Group, cycle_range* Range, cycle_range* Fram
   return;
 }
 
-function void
+bonsai_function void
 PushScopeBarsRecursive(debug_ui_render_group *Group, debug_profile_scope *Scope, cycle_range *Frame, r32 TotalGraphWidth, random_series *Entropy, u32 Depth = 0)
 {
   while (Scope)
@@ -2035,7 +2035,7 @@ PushScopeBarsRecursive(debug_ui_render_group *Group, debug_profile_scope *Scope,
   return;
 }
 
-function void
+bonsai_function void
 DebugDrawFlamegraph(debug_ui_render_group *Group, debug_state *SharedState, v2 BasisP)
 {
   random_series Entropy = {};
@@ -2150,7 +2150,7 @@ DebugDrawFlamegraph(debug_ui_render_group *Group, debug_state *SharedState, v2 B
 static called_function ProgramFunctionCalls[MAX_RECORDED_FUNCTION_CALLS];
 static called_function NullFunctionCall = {};
 
-function void
+bonsai_function void
 CollateAllFunctionCalls(debug_profile_scope* Current)
 {
   if (!Current || !Current->Name)
@@ -2213,7 +2213,7 @@ CollateAllFunctionCalls(debug_profile_scope* Current)
   return;
 }
 
-function unique_debug_profile_scope *
+bonsai_function unique_debug_profile_scope *
 ListContainsScope(unique_debug_profile_scope* List, debug_profile_scope* Query)
 {
   unique_debug_profile_scope* Result = 0;
@@ -2230,7 +2230,7 @@ ListContainsScope(unique_debug_profile_scope* List, debug_profile_scope* Query)
   return Result;
 }
 
-function void
+bonsai_function void
 DumpScopeTreeDataToConsole_Internal(debug_profile_scope *Scope_in, debug_profile_scope *TreeRoot, memory_arena *Memory)
 {
   unique_debug_profile_scope* UniqueScopes = {};
@@ -2276,7 +2276,7 @@ DumpScopeTreeDataToConsole_Internal(debug_profile_scope *Scope_in, debug_profile
   return;
 }
 
-function void
+bonsai_function void
 BufferFirstCallToEach(debug_ui_render_group *Group,
                       debug_profile_scope *Scope_in, debug_profile_scope *TreeRoot,
                       memory_arena *Memory, window_layout* Window, u64 TotalFrameCycles, u32 Depth)
@@ -2326,7 +2326,7 @@ BufferFirstCallToEach(debug_ui_render_group *Group,
   return;
 }
 
-function void
+bonsai_function void
 DrawFrameTicker(debug_ui_render_group *Group, debug_state *DebugState, r64 MaxMs)
 {
   TIMED_FUNCTION();
@@ -2391,12 +2391,12 @@ DrawFrameTicker(debug_ui_render_group *Group, debug_state *DebugState, r64 MaxMs
   return;
 }
 
-function void
+bonsai_function void
 DebugDrawCallGraph(debug_ui_render_group *Group, debug_state *DebugState, r64 MaxMs)
 {
   DrawFrameTicker(Group, DebugState, Max(33.3, MaxMs));
 
-  u32 TotalThreadCount = GetWorkerThreadCount() + 1;
+  u32 TotalThreadCount = (u32)GetWorkerThreadCount() + 1;
 
   debug_thread_state *MainThreadState  = GetThreadLocalStateFor(0);
   debug_scope_tree *MainThreadReadTree = MainThreadState->ScopeTrees + DebugState->ReadScopeIndex;
@@ -2410,7 +2410,7 @@ DebugDrawCallGraph(debug_ui_render_group *Group, debug_state *DebugState, r64 Ma
     PushTableStart(Group);
 
     PushColumn(Group, CSz("Frame %"));
-    PushColumn(Group, CSz("Cycles"));;
+    PushColumn(Group, CSz("Cycles"));
     PushColumn(Group, CSz("Calls"));
     PushColumn(Group, CSz("Name"));
     PushNewRow(Group);
@@ -2445,7 +2445,7 @@ DebugDrawCallGraph(debug_ui_render_group *Group, debug_state *DebugState, r64 Ma
 
 debug_global hotkeys HotkeyThing;
 
-function void
+bonsai_function void
 OpenDebugWindowAndLetUsDoStuff()
 {
   debug_state* DebugState = GetDebugState();
@@ -2480,7 +2480,7 @@ DumpScopeTreeDataToConsole()
 
 
 
-function void
+bonsai_function void
 PushCallgraphRecursive(debug_ui_render_group *Group, debug_profile_scope* At)
 {
   if (At)
@@ -2503,7 +2503,7 @@ PushCallgraphRecursive(debug_ui_render_group *Group, debug_profile_scope* At)
   return;
 }
 
-function void
+bonsai_function void
 DumpCallgraphRecursive(debug_ui_render_group *Group, debug_profile_scope* At, u32 Depth = 0)
 {
   for (u32 DepthIndex = 0;
@@ -2528,7 +2528,7 @@ DumpCallgraphRecursive(debug_ui_render_group *Group, debug_profile_scope* At, u3
   return;
 }
 
-function void
+bonsai_function void
 DebugDrawCollatedFunctionCalls(debug_ui_render_group *Group, debug_state *DebugState)
 {
 #if 0
@@ -2653,7 +2653,7 @@ debug_global const u32 Global_DrawCallArrayLength = 128;
 debug_global debug_draw_call Global_DrawCalls[Global_DrawCallArrayLength] = {};
 debug_global debug_draw_call NullDrawCall = {};
 
-function void
+bonsai_function void
 TrackDrawCall(const char* Caller, u32 VertexCount)
 {
   u64 Index = ((u64)Caller) % Global_DrawCallArrayLength;
@@ -2685,7 +2685,7 @@ TrackDrawCall(const char* Caller, u32 VertexCount)
   return;
 }
 
-function void
+bonsai_function void
 DebugDrawDrawCalls(debug_ui_render_group *Group)
 {
   local_persist window_layout DrawCallWindow = WindowLayout("Draw Calls", V2(0));
@@ -2725,7 +2725,7 @@ DebugDrawDrawCalls(debug_ui_render_group *Group)
 /*******************************            **********************************/
 
 
-function void
+bonsai_function void
 PushBargraph(debug_ui_render_group *Group, r32 PercFilled)
 {
   r32 BarHeight = Global_Font.Size.y;
@@ -2743,7 +2743,7 @@ PushBargraph(debug_ui_render_group *Group, r32 PercFilled)
   return;
 }
 
-function interactable_handle
+bonsai_function interactable_handle
 PushArenaBargraph(debug_ui_render_group *Group, umm TotalUsed, r32 TotalPerc, umm Remaining, umm InteractionId)
 {
   PushColumn(Group, MemorySize(TotalUsed));
@@ -2757,7 +2757,7 @@ PushArenaBargraph(debug_ui_render_group *Group, umm TotalUsed, r32 TotalPerc, um
   return Handle;
 }
 
-function void
+bonsai_function void
 PushMemoryStatsTable(memory_arena_stats MemStats, debug_ui_render_group *Group)
 {
   PushColumn(Group, CSz("Allocs"));
@@ -2779,7 +2779,7 @@ PushMemoryStatsTable(memory_arena_stats MemStats, debug_ui_render_group *Group)
   return;
 }
 
-function void
+bonsai_function void
 PushMemoryBargraphTable(debug_ui_render_group *Group, selected_arenas *SelectedArenas, memory_arena_stats MemStats, umm TotalUsed, memory_arena *HeadArena)
 {
 
@@ -2843,7 +2843,7 @@ PushMemoryBargraphTable(debug_ui_render_group *Group, selected_arenas *SelectedA
   return;
 }
 
-function void
+bonsai_function void
 PushDebugPushMetaData(debug_ui_render_group *Group, selected_arenas *SelectedArenas, umm CurrentArenaHead)
 {
   push_metadata CollatedMetaTable[META_TABLE_SIZE] = {};
@@ -2857,7 +2857,7 @@ PushDebugPushMetaData(debug_ui_render_group *Group, selected_arenas *SelectedAre
 
 
   // Pick out relevant metadata and write to collation table
-  u32 TotalThreadCount = GetWorkerThreadCount() + 1;
+  u32 TotalThreadCount = (u32)GetWorkerThreadCount() + 1;
 
 
   for ( u32 ThreadIndex = 0;
@@ -2941,7 +2941,7 @@ PushDebugPushMetaData(debug_ui_render_group *Group, selected_arenas *SelectedAre
   return;
 }
 
-function void
+bonsai_function void
 DebugDrawMemoryHud(debug_ui_render_group *Group, debug_state *DebugState)
 {
   local_persist window_layout MemoryArenaWindowInstance = WindowLayout("Memory Arenas", V2(0));
@@ -3005,7 +3005,8 @@ DebugDrawMemoryHud(debug_ui_render_group *Group, debug_state *DebugState)
 
 
 
-function void
+#if 0
+bonsai_function void
 DebugDrawNetworkHud(debug_ui_render_group *Group, network_connection *Network, server_state *ServerState)
 {
   local_persist window_layout NetworkWindow = WindowLayout("Network", V2(0));
@@ -3054,6 +3055,7 @@ DebugDrawNetworkHud(debug_ui_render_group *Group, network_connection *Network, s
 
   return;
 }
+#endif
 
 
 
@@ -3063,7 +3065,7 @@ DebugDrawNetworkHud(debug_ui_render_group *Group, network_connection *Network, s
 
 
 
-function void
+bonsai_function void
 DebugDrawGraphicsHud(debug_ui_render_group *Group, debug_state *DebugState)
 {
   PushTableStart(Group);
@@ -3080,7 +3082,7 @@ DebugDrawGraphicsHud(debug_ui_render_group *Group, debug_state *DebugState)
 
 
 
-function void
+bonsai_function void
 DebugValue(u32 Value, const char* Name)
 {
   debug_state* DebugState = GetDebugState();
@@ -3093,7 +3095,7 @@ DebugValue(u32 Value, const char* Name)
   PushTableEnd(Group);
 }
 
-function void
+bonsai_function void
 FramebufferTextureLayer(framebuffer *FBO, texture *Tex, debug_texture_array_slice Layer)
 {
   u32 Attachment = FBO->Attachments++;
@@ -3102,7 +3104,7 @@ FramebufferTextureLayer(framebuffer *FBO, texture *Tex, debug_texture_array_slic
   return;
 }
 
-function void
+bonsai_function void
 InitDebugOverlayFramebuffer(debug_text_render_group *TextGroup, memory_arena *DebugArena, const char *DebugFont)
 {
   TextGroup->FontTexture = LoadBitmap(DebugFont, DebugArena, DebugTextureArraySlice_Count);
@@ -3119,7 +3121,7 @@ InitDebugOverlayFramebuffer(debug_text_render_group *TextGroup, memory_arena *De
   return;
 }
 
-function void
+bonsai_function void
 AllocateAndInitGeoBuffer(textured_2d_geometry_buffer *Geo, u32 VertCount, memory_arena *DebugArena)
 {
   Geo->Verts  = Allocate(v3, DebugArena, VertCount);
@@ -3130,7 +3132,7 @@ AllocateAndInitGeoBuffer(textured_2d_geometry_buffer *Geo, u32 VertCount, memory
   Geo->At = 0;
 }
 
-function void
+bonsai_function void
 AllocateAndInitGeoBuffer(untextured_2d_geometry_buffer *Geo, u32 VertCount, memory_arena *DebugArena)
 {
   Geo->Verts = Allocate(v3, DebugArena, VertCount);
@@ -3141,7 +3143,7 @@ AllocateAndInitGeoBuffer(untextured_2d_geometry_buffer *Geo, u32 VertCount, memo
   return;
 }
 
-function shader
+bonsai_function shader
 MakeSolidUIShader(memory_arena *Memory)
 {
   shader SimpleTextureShader = LoadShaders( CSz("SimpleColor.vertexshader"),
@@ -3150,7 +3152,7 @@ MakeSolidUIShader(memory_arena *Memory)
   return SimpleTextureShader;
 }
 
-function shader
+bonsai_function shader
 MakeRenderToTextureShader(memory_arena *Memory, m4 *ViewProjection)
 {
   shader Shader = LoadShaders( CSz("RenderToTexture.vertexshader"),
@@ -3165,7 +3167,7 @@ MakeRenderToTextureShader(memory_arena *Memory, m4 *ViewProjection)
   return Shader;
 }
 
-function b32
+bonsai_function b32
 InitDebugRenderSystem(debug_state *DebugState, heap_allocator *Heap)
 {
   AllocateMesh(&DebugState->LineMesh, 1024, Heap);

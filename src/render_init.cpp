@@ -341,14 +341,14 @@ GraphicsInit(memory_arena *GraphicsMemory)
   g_buffer_render_group *gBuffer = CreateGbuffer(GraphicsMemory);
   if (!InitGbufferRenderGroup(gBuffer, GraphicsMemory))
   {
-    Error("Initializing g_buffer_render_group"); return False;
+    Error("Initializing g_buffer_render_group"); return 0;
   }
 
 
   ao_render_group *AoGroup = CreateAoRenderGroup(GraphicsMemory);
   if (!InitAoRenderGroup(AoGroup, GraphicsMemory))
   {
-    Error("Initializing ao_render_group"); return False;
+    Error("Initializing ao_render_group"); return 0;
   }
 
   texture *SsaoNoiseTexture = AllocateAndInitSsaoNoise(AoGroup, GraphicsMemory);

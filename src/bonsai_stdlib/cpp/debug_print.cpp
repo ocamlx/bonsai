@@ -1,5 +1,5 @@
 
-function void
+bonsai_function void
 Log(const char* fmt...)
 {
   va_list args;

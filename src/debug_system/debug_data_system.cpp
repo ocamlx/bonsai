@@ -80,7 +80,7 @@ RegisterArena(const char *Name, memory_arena *Arena)
     const char *CurrentName = Current->Name;
     if (!CurrentName)
     {
-      if (AtomicCompareExchange( (volatile char **)&Current->Name, (volatile char*)Name, (volatile char*)CurrentName ))
+      if (AtomicCompareExchange( (volatile char **)&Current->Name, (char*)Name, (char*)CurrentName ))
       {
         Current->Arena = Arena;
         Registered = True;
@@ -127,7 +127,7 @@ PushesMatchExactly(push_metadata *First, push_metadata *Second)
 inline void
 ClearMetaRecordsFor(memory_arena *Arena)
 {
-  u32 TotalThreadCount = GetWorkerThreadCount() + 1;
+  u32 TotalThreadCount = (u32)GetWorkerThreadCount() + 1;
   for ( u32 ThreadIndex = 0;
       ThreadIndex < TotalThreadCount;
       ++ThreadIndex)
@@ -246,7 +246,7 @@ DEBUG_Allocate(memory_arena* Arena, umm StructSize, umm StructCount, const char*
   {
     Error("Pushing %s on Line: %d, in file %s", Name, Line, File);
     Assert(False);
-    return False;
+    return 0;
   }
 
   return Result;
@@ -729,7 +729,7 @@ FindRecord(mutex_op_record *WaitRecord, mutex_op_record *FinalRecord, mutex_op S
 {
   Assert(WaitRecord->Op == MutexOp_Waiting);
 
-  mutex_op_record *Result = 0;;
+  mutex_op_record *Result = 0;
   mutex_op_record *SearchRecord = WaitRecord;
 
   while (SearchRecord < FinalRecord)

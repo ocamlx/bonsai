@@ -51,6 +51,7 @@
 #define YELLOW_TERMINAL "\x1b[33m"
 #define WHITE_TERMINAL "\x1b[37m"
 
+
 #define Info(...)                                                  \
   LogToConsole(CSz(BLUE_TERMINAL "   Info" WHITE_TERMINAL " - ")); \
   printf(__VA_ARGS__);                                             \
@@ -76,7 +77,6 @@
   LogToConsole(CSz("\n"))
 
 #define RuntimeBreak() raise(SIGTRAP)
-#define TriggeredRuntimeBreak() if (GetDebugState) { GetDebugState()->TriggerRuntimeBreak ? RuntimeBreak() : 0 ; }
 
 #define Newline "\n"
 
@@ -167,7 +167,7 @@ typedef GLXContext gl_context;
 typedef pthread_mutex_t native_mutex;
 typedef Window window;
 
-function void
+bonsai_function void
 LogToConsole(counted_string Output);
 
 inline void
@@ -265,24 +265,6 @@ AtomicCompareExchange( volatile u32 *Source, u32 Exchange, u32 Comparator )
   return Result;
 }
 
-void
-ReadBytes(u8* Dest, u64 BytesToRead, FILE *Src)
-{
-  Assert(BytesToRead);
-  u64 BytesRead = fread(Dest, 1, BytesToRead, Src);
-  Assert(BytesRead != 0);
-  return;
-}
-
-struct os
-{
-  window Window;
-  display Display;
-  gl_context GlContext;
-
-  b32 ContinueRunning = True;
-};
-
 struct native_file
 {
   FILE* Handle;
@@ -294,3 +276,70 @@ global_variable native_file Stdout =
   .Handle = stdout,
   .Path = CSz("stdout")
 };
+
+bonsai_function void
+LogToConsole(counted_string Output)
+{
+  if (!WriteToFile(&Stdout, Output))
+  {
+    Error("Writing to Stdout");
+  }
+}
+
+bonsai_function void
+PlatformMemprotect(void* LastPage, umm PageSize, s32 Protection)
+{
+  s32 ProtectSuccess = (mprotect(LastPage, PageSize, PROT_NONE) == 0);
+
+  if (!ProtectSuccess)
+  {
+    if (errno == EACCES)
+    {
+      Error("EACCES");
+    }
+
+    if (errno == EINVAL)
+    {
+      Error("EINVAL");
+    }
+
+    if (errno == ENOMEM)
+    {
+      Error("ENOMEM");
+    }
+
+    Error("mprotect failed");
+    PlatformDebugStacktrace();
+    Assert(False);
+  }
+
+  return;
+}
+
+inline socket_t
+CreateSocket(socket_type Type)
+{
+  s32 SocketType = SOCK_STREAM | (Type == Socket_Blocking ? 0 : SOCK_NONBLOCK);
+
+  socket_t Socket = {Type};
+  Socket.Id = socket(AF_INET, SocketType, 0);
+
+  if (Socket.Id == -1)
+  {
+    Error("Could not create socket");
+    Socket.Id = 0;
+  }
+  return Socket;
+}
+
+inline sockaddr_in
+CreateAddress(const char* IP)
+{
+  sockaddr_in Address = {};
+  Address.sin_family = AF_INET;
+  Address.sin_port = htons( REMOTE_PORT );
+  Address.sin_addr.s_addr = inet_addr(IP);
+  return Address;
+}
+
+

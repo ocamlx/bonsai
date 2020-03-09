@@ -1,5 +1,5 @@
 
-function metaprogramming_directive
+bonsai_function metaprogramming_directive
 MetaprogrammingDirective(counted_string S)
 {
   metaprogramming_directive Result = {};

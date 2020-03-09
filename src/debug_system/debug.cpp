@@ -6,7 +6,7 @@
 
 global_variable debug_state Internal_DebugState = {};
 
-function void
+bonsai_function void
 DebugFrameEnd(platform *Plat, server_state* ServerState)
 {
   TIMED_FUNCTION();
@@ -98,7 +98,7 @@ DebugFrameEnd(platform *Plat, server_state* ServerState)
     PushTableStart(UiGroup);
 
 #define ToggleBitfieldValue(Dest, Value) \
-      (Dest) = (Dest) & (Value) ?  ((u32)(Dest) & ~(u32)(Value)) : ((u32)(Dest) | (u32)(Value));
+      (Dest) = (Dest) & (Value) ?  ((u32)(Dest) & ~(u32)(Value)) : ((u32)(Dest) | (u32)(Value))
 
     if (Button(UiGroup, CS("PickedChunks"), (umm)"PickedChunks", &Style, Padding))
     {
@@ -212,7 +212,7 @@ DebugFrameEnd(platform *Plat, server_state* ServerState)
   return;
 }
 
-function void
+bonsai_function void
 DebugFrameBegin(hotkeys *Hotkeys)
 {
   debug_state *State = GetDebugState();
